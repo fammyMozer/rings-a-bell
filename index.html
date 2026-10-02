@@ -1,0 +1,1421 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E1B4B">
+<title>Rings a Bell</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFD23F; --ink:#1E1B4B; --panel:#FFFFFF; --soft:#FFF0B3; --muted:#5B5785;
+  --hot:#D81E5B; --on-hot:#FFFFFF; --go:#0B8A54; --on-go:#FFFFFF; --dial:#3BCEAC; --shadow:#1E1B4B;
+  --display:"Secular One","Fredoka",system-ui,sans-serif;
+  --body:"Fredoka",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#17153B; --ink:#FFF3C4; --panel:#25225A; --soft:#353080; --muted:#C2BDF0;
+    --hot:#FF5C8A; --on-hot:#17153B; --go:#2BD687; --on-go:#0E2A1C; --dial:#3BCEAC; --shadow:#08071C;
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;min-height:100vh;-webkit-tap-highlight-color:transparent}
+img{max-width:100%}
+.wrap{max-width:520px;margin:0 auto;padding:12px 16px 180px}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.1;margin:0}
+h2{font-size:26px}
+h3{font-size:20px;margin-bottom:10px}
+.screen{display:none}
+.screen.on{display:block}
+.hidden{display:none!important}
+
+/* surfaces */
+.card{background:var(--panel);border:2.5px solid var(--ink);border-radius:22px;box-shadow:4px 4px 0 var(--shadow);padding:18px;margin-bottom:16px}
+.center{text-align:center}
+
+/* buttons */
+.btn{font:600 18px/1.1 var(--body);border:2.5px solid var(--ink);border-radius:999px;padding:12px 20px;background:var(--panel);color:var(--ink);box-shadow:3px 3px 0 var(--shadow);cursor:pointer;min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;text-align:center;transition:transform .06s,box-shadow .06s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+.btn.primary{background:var(--hot);color:var(--on-hot)}
+.btn.go{background:var(--go);color:var(--on-go)}
+.btn.block{display:flex;width:100%}
+.btn.small{min-height:44px;padding:8px 14px;font-size:16px}
+.btn:disabled{opacity:.45;box-shadow:none;transform:none;cursor:default}
+.link{background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:3px;font:500 16px var(--body);padding:10px 6px;cursor:pointer}
+.iconbtn{width:46px;height:46px;border-radius:50%;border:2.5px solid var(--ink);background:var(--panel);color:var(--ink);display:grid;place-items:center;box-shadow:2px 2px 0 var(--shadow);cursor:pointer;padding:0}
+.iconbtn svg{width:24px;height:24px}
+.iconbtn[aria-pressed="false"]{background:var(--soft)}
+:focus-visible{outline:3px solid var(--dial);outline-offset:3px}
+
+/* inputs */
+.field{display:block;margin:0 0 16px}
+.field>.lab{display:block;font-weight:600;margin-bottom:6px}
+input[type=text],input[type=number],input[type=url],input[type=tel]{width:100%;font:500 18px var(--body);padding:12px 14px;border:2.5px solid var(--ink);border-radius:14px;background:var(--panel);color:var(--ink);min-height:52px}
+input::placeholder{color:var(--muted);opacity:.85}
+input:disabled{background:var(--soft);opacity:.7}
+.row{display:flex;gap:10px;align-items:stretch}
+.row>input{flex:1;min-width:0}
+.rule{border:0;border-top:2.5px dashed var(--soft);margin:18px 0}
+.msg{margin:6px 0 0;font-weight:500;min-height:1.2em}
+.msg.err{color:var(--hot)}
+.hint{color:var(--muted);font-weight:500;margin:0 0 14px;text-align:center}
+.credit{text-align:center;font-size:14px;color:var(--muted);margin-top:8px}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;min-height:50px}
+.tools{display:flex;gap:8px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:20px}
+.brand svg{width:34px;height:34px}
+.brand .rc{font-family:var(--body);font-weight:600;font-size:15px;border:2px solid var(--ink);border-radius:999px;padding:2px 10px;background:var(--panel);direction:ltr;unicode-bidi:isolate}
+
+/* hero */
+.hero{text-align:center;padding:10px 0 22px}
+.bigbell{width:132px;height:132px;margin:0 auto 6px;transform-origin:50% 12%}
+.logo{font-size:clamp(48px,14vw,68px);letter-spacing:-.01em;line-height:1;direction:ltr}
+.tag{font-size:19px;font-weight:500;margin:10px 0 0}
+
+/* bell motion */
+@keyframes ring{0%{transform:rotate(0)}12%{transform:rotate(16deg)}26%{transform:rotate(-13deg)}40%{transform:rotate(9deg)}54%{transform:rotate(-6deg)}68%{transform:rotate(3deg)}82%{transform:rotate(-1deg)}100%{transform:rotate(0)}}
+.ring{animation:ring 1.1s ease-out}
+.bellsvg{transform-origin:50% 14%}
+@media (prefers-reduced-motion: reduce){.ring{animation:none}.btn,.fill,.needle{transition:none}}
+
+/* lobby */
+.codecap{font-weight:600;color:var(--muted)}
+.code{font-family:var(--display);font-size:clamp(64px,22vw,96px);letter-spacing:.12em;line-height:1;margin:6px 0 14px;direction:ltr;unicode-bidi:isolate}
+.players{list-style:none;margin:0;padding:0}
+.players li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:2px dashed var(--soft);font-weight:500;font-size:18px}
+.players li:last-child{border-bottom:0}
+.players li.off{opacity:.45}
+.badge{font-size:13px;font-weight:600;border:2px solid var(--ink);border-radius:999px;padding:1px 9px;white-space:nowrap}
+.plsum{display:flex;gap:12px;align-items:center}
+.plsum img{width:56px;height:56px;border-radius:12px;border:2px solid var(--ink);object-fit:cover;flex:none}
+.plsum .t{font-weight:600}
+.plsum .s{color:var(--muted);font-size:15px}
+
+/* setup */
+.results{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:8px}
+.results button{width:100%;display:flex;align-items:center;gap:12px;padding:8px;border:2px solid var(--ink);border-radius:14px;background:var(--panel);color:var(--ink);font:500 16px var(--body);text-align:start;cursor:pointer}
+.results button:active{background:var(--soft)}
+.results img{width:44px;height:44px;border-radius:8px;flex:none;object-fit:cover;background:var(--soft)}
+.results .rt{font-weight:600;display:block}
+.results .rs{font-size:14px;color:var(--muted)}
+.picked{display:flex;gap:12px;align-items:center;background:var(--soft);border-radius:16px;padding:10px;margin-top:6px}
+.picked img{width:64px;height:64px;border-radius:12px;border:2px solid var(--ink);object-fit:cover;flex:none}
+.picked .t{font-weight:600;font-size:18px}
+.opt{display:flex;align-items:center;gap:12px;padding:12px;border:2.5px solid var(--ink);border-radius:16px;margin-bottom:10px;cursor:pointer;flex-wrap:wrap}
+.opt:has(input:checked){background:var(--soft)}
+.opt input[type=radio]{width:22px;height:22px;accent-color:var(--hot);margin:0}
+.opt .ol{flex:1;font-weight:500;min-width:140px}
+.opt .num{display:flex;align-items:center;gap:6px}
+.opt .num input{width:84px;min-height:44px;padding:6px 10px;text-align:center}
+
+/* game */
+.roundline{display:flex;align-items:center;gap:10px;justify-content:space-between;margin:-2px 2px 12px;font-weight:600}
+.roundline .tl{color:var(--muted)}
+.stage{display:flex;align-items:center;gap:16px}
+.playbtn{width:84px;height:84px;border-radius:50%;border:3px solid var(--ink);background:var(--hot);color:var(--on-hot);display:grid;place-items:center;box-shadow:4px 4px 0 var(--shadow);cursor:pointer;flex:none;padding:0}
+.playbtn:active{transform:translate(4px,4px);box-shadow:none}
+.playbtn svg{width:40px;height:40px}
+@keyframes pulse{0%,100%{box-shadow:4px 4px 0 var(--shadow),0 0 0 0 var(--hot)}50%{box-shadow:4px 4px 0 var(--shadow),0 0 0 12px transparent}}
+.playbtn.need{animation:pulse 1.2s infinite}
+.secs{font-family:var(--display);font-size:46px;line-height:1}
+.secs small{font-family:var(--body);font-size:18px;font-weight:600;margin-inline-start:6px}
+.stagehint{color:var(--muted);font-weight:500;margin-top:4px}
+.dial{margin-top:18px;--p:0}
+.trk{position:relative;height:16px;border:2.5px solid var(--ink);border-radius:999px;background:var(--soft)}
+.fill{position:absolute;top:0;bottom:0;inset-inline-start:0;width:calc(var(--p) * 100%);background:var(--dial);border-radius:999px;transition:width .45s cubic-bezier(.3,1.4,.6,1)}
+.needle{position:absolute;top:-11px;width:6px;height:34px;margin-inline-start:-3px;inset-inline-start:calc(var(--p) * 100%);background:var(--hot);border:2px solid var(--ink);border-radius:3px;transition:inset-inline-start .45s cubic-bezier(.3,1.4,.6,1)}
+.stops{display:flex;justify-content:space-between;margin-top:10px;font-weight:600;font-size:15px;color:var(--muted)}
+.stops span.on{color:var(--ink)}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.slot{background:var(--panel);border:2.5px solid var(--ink);border-radius:18px;box-shadow:3px 3px 0 var(--shadow);padding:12px 14px;min-height:104px;display:flex;flex-direction:column}
+.slot .lb{font-size:14px;font-weight:600;color:var(--muted)}
+.slot .val{font-family:var(--display);font-size:22px;line-height:1.15;margin-top:4px;overflow-wrap:anywhere;flex:1}
+.slot .by{font-size:14px;font-weight:500;margin-top:6px}
+.slot.found{background:var(--go);color:var(--on-go)}
+.slot.found .lb{color:inherit;opacity:.85}
+.slot.missed{background:var(--soft)}
+.ac{position:relative}
+.ac-list{position:absolute;inset-inline:0;top:100%;margin:6px 0 0;padding:4px;list-style:none;background:var(--panel);border:2.5px solid var(--ink);border-radius:14px;box-shadow:3px 3px 0 var(--shadow);z-index:20;max-height:280px;overflow:auto}
+.ac-list button{width:100%;text-align:start;padding:12px;border:0;background:none;color:var(--ink);font:500 17px var(--body);border-radius:10px;cursor:pointer}
+.ac-list button:active,.ac-list button:hover{background:var(--soft)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.shake{animation:shake .4s}
+.rhead{font-family:var(--display);font-size:24px;margin-bottom:12px}
+.rbody{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.rbody img{width:92px;height:92px;border-radius:14px;border:2.5px solid var(--ink);object-fit:cover;flex:none;background:var(--soft)}
+.rtitle{font-family:var(--display);font-size:24px;line-height:1.15;overflow-wrap:anywhere}
+.rartist{font-weight:500;font-size:18px;margin-top:2px}
+.board{list-style:none;margin:0;padding:0;counter-reset:r}
+.board li{display:flex;align-items:center;gap:12px;padding:8px 2px;border-bottom:2px dashed var(--soft);font-weight:500;font-size:18px}
+.board li:last-child{border-bottom:0}
+.board li .rk{font-family:var(--display);width:28px;text-align:center;flex:none}
+.board li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board li .sc{font-family:var(--display);font-size:22px}
+.board li.me{background:var(--soft);border-radius:12px;padding-inline:8px}
+.board li.off{opacity:.5}
+.board.big li{font-size:20px;padding:12px 4px}
+.board.big li:first-child .sc{color:var(--hot)}
+.winner{font-family:var(--display);font-size:30px;margin:8px 0 0}
+
+/* host bar */
+.hostbar{position:fixed;inset-inline:0;bottom:0;z-index:30;background:var(--ink);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+.hostbar .inner{max-width:520px;margin:0 auto;display:flex;gap:10px}
+.hostbar .btn{flex:1;border-color:var(--bg);box-shadow:3px 3px 0 rgba(0,0,0,.35)}
+.hostcap{max-width:520px;margin:0 auto 8px;color:var(--bg);font-size:14px;font-weight:600;opacity:.85}
+
+/* toast */
+.toast{position:fixed;inset-inline:16px;top:calc(12px + env(safe-area-inset-top,0px));z-index:50;max-width:488px;margin:0 auto;background:var(--ink);color:var(--bg);font-weight:600;font-size:18px;padding:14px 18px;border-radius:16px;box-shadow:4px 4px 0 rgba(0,0,0,.3);text-align:center;transform:translateY(-140%);transition:transform .25s}
+.toast.show{transform:translateY(0)}
+.toast.good{background:var(--go);color:var(--on-go)}
+
+/* dialog */
+dialog{border:2.5px solid var(--ink);border-radius:22px;background:var(--panel);color:var(--ink);padding:20px;width:min(92vw,440px);box-shadow:6px 6px 0 var(--shadow)}
+dialog::backdrop{background:rgba(23,21,59,.55)}
+dialog h2{margin-bottom:16px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{flex:1 1 auto;min-height:46px;padding:8px 14px;border:2.5px solid var(--ink);border-radius:999px;background:var(--panel);color:var(--ink);font:600 16px var(--body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.stack{display:grid;gap:10px;margin-top:8px}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-bell" viewBox="0 0 64 64">
+      <g class="bellsvg"><path d="M32 6c-1.7 0-3 1.3-3 3v1.6C21.6 12.1 17 18.5 17 26.5V35l-5 6.8V44h40v-2.2L47 35v-8.5c0-8-4.6-14.4-12-15.9V9c0-1.7-1.3-3-3-3z" fill="currentColor"/>
+      <circle cx="32" cy="50.5" r="5" fill="var(--hot)" stroke="currentColor" stroke-width="2"/></g>
+    </symbol>
+    <symbol id="i-bell-off" viewBox="0 0 64 64">
+      <path d="M32 6c-1.7 0-3 1.3-3 3v1.6C21.6 12.1 17 18.5 17 26.5V35l-5 6.8V44h40v-2.2L47 35v-8.5c0-8-4.6-14.4-12-15.9V9c0-1.7-1.3-3-3-3z" fill="currentColor" opacity=".35"/>
+      <path d="M10 10l44 44" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24">
+      <path d="M4 7h10M18 7h2M4 17h2M10 17h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+      <circle cx="16" cy="7" r="2.6" fill="none" stroke="currentColor" stroke-width="2.4"/>
+      <circle cx="8" cy="17" r="2.6" fill="none" stroke="currentColor" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 4.5v15l12-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4.2" height="14" rx="1" fill="currentColor"/><rect x="13.8" y="5" width="4.2" height="14" rx="1" fill="currentColor"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><path d="M12 5V1.5L6.5 6 12 10.5V7a5.5 5.5 0 1 1-5.5 5.5H4.2A7.8 7.8 0 1 0 12 5z" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<!-- HOME -->
+<section class="screen on" id="s-home">
+  <div class="top">
+    <span></span>
+    <div class="tools"><button class="iconbtn" data-act="settings" data-ta="settings"><svg><use href="#i-gear"/></svg></button></div>
+  </div>
+  <div class="hero">
+    <svg class="bigbell ring" id="hero-bell" aria-hidden="true"><use href="#i-bell"/></svg>
+    <h1 class="logo">Rings a Bell</h1>
+    <p class="tag" data-t="tagline"></p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="lab" for="name" data-t="yourName"></label>
+      <input id="name" type="text" maxlength="20" autocomplete="nickname" data-tp="namePh">
+    </div>
+    <button class="btn primary block" id="btn-create" data-t="createRoom"></button>
+    <hr class="rule">
+    <div class="field" style="margin-bottom:0">
+      <label class="lab" for="join-code" data-t="joinTitle"></label>
+      <div class="row">
+        <input id="join-code" type="tel" inputmode="numeric" maxlength="4" autocomplete="off" data-tp="codePh">
+        <button class="btn" id="btn-join" data-t="join"></button>
+      </div>
+    </div>
+    <button class="btn block hidden" id="btn-rejoin" style="margin-top:14px"></button>
+  </div>
+  <p class="credit" data-t="dzCredit"></p>
+</section>
+
+<!-- SETUP -->
+<section class="screen" id="s-setup">
+  <div class="top">
+    <button class="link" id="setup-back" data-t="back"></button>
+    <h2 data-t="setupTitle"></h2>
+    <span style="width:46px"></span>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="lab" for="pl-link" data-t="playlistLabel"></label>
+      <div class="row">
+        <input id="pl-link" type="url" inputmode="url" autocomplete="off" data-tp="playlistPh">
+        <button class="btn" id="pl-load" data-t="load"></button>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label class="lab" for="pl-q" data-t="orSearch"></label>
+      <div class="row">
+        <input id="pl-q" type="text" autocomplete="off" enterkeyhint="search" data-tp="searchPh">
+        <button class="btn" id="pl-search" data-t="search"></button>
+      </div>
+    </div>
+    <ul class="results" id="pl-results"></ul>
+    <div class="picked hidden" id="pl-pick">
+      <img id="pl-pic" alt="">
+      <div><div class="t" id="pl-title"></div><div id="pl-status"></div></div>
+    </div>
+    <p class="msg" id="pl-msg" role="status"></p>
+  </div>
+  <div class="card">
+    <h3 data-t="endTitle"></h3>
+    <label class="opt"><input type="radio" name="endmode" value="songs" checked><span class="ol" data-t="endSongs"></span>
+      <span class="num"><input type="number" id="end-songs" value="10" min="1" max="500" inputmode="numeric"><span data-t="songsUnit"></span></span></label>
+    <label class="opt"><input type="radio" name="endmode" value="time"><span class="ol" data-t="endTime"></span>
+      <span class="num"><input type="number" id="end-min" value="30" min="1" max="600" inputmode="numeric"><span data-t="minutesUnit"></span></span></label>
+    <label class="opt" style="margin-bottom:0"><input type="radio" name="endmode" value="manual"><span class="ol" data-t="endManual"></span></label>
+  </div>
+  <button class="btn primary block" id="setup-save"></button>
+</section>
+
+<!-- LOBBY -->
+<section class="screen" id="s-lobby">
+  <div class="top">
+    <div class="brand"><svg aria-hidden="true"><use href="#i-bell"/></svg>Rings a Bell</div>
+    <div class="tools">
+      <button class="iconbtn" data-act="sound"></button>
+      <button class="iconbtn" data-act="settings" data-ta="settings"><svg><use href="#i-gear"/></svg></button>
+    </div>
+  </div>
+  <div class="card center">
+    <div class="codecap" data-t="lobbyCode"></div>
+    <div class="code" id="lobby-code"></div>
+    <button class="btn" id="btn-share" data-t="share"></button>
+  </div>
+  <div class="card">
+    <h3><span data-t="players"></span> (<span id="lobby-count">0</span>)</h3>
+    <ul class="players" id="lobby-players"></ul>
+  </div>
+  <div class="card">
+    <div class="plsum" id="lobby-sum"></div>
+    <button class="link hidden" id="lobby-change" data-t="changeSettings" style="margin-top:6px"></button>
+  </div>
+  <p class="hint" id="lobby-wait" data-t="waitStart"></p>
+  <div class="hostbar hidden" id="lobby-bar"><div class="inner"><button class="btn primary" id="btn-start" data-t="startGame"></button></div></div>
+</section>
+
+<!-- GAME -->
+<section class="screen" id="s-game">
+  <div class="top">
+    <div class="brand"><svg aria-hidden="true" id="game-bell"><use href="#i-bell"/></svg><span class="rc" id="game-code"></span></div>
+    <div class="tools">
+      <button class="iconbtn" data-act="sound"></button>
+      <button class="iconbtn" data-act="settings" data-ta="settings"><svg><use href="#i-gear"/></svg></button>
+    </div>
+  </div>
+  <div class="roundline"><span id="g-round"></span><span class="tl" id="g-time"></span></div>
+  <div class="card">
+    <div class="stage">
+      <button class="playbtn" id="g-play"><svg><use href="#i-replay"/></svg></button>
+      <div>
+        <div class="secs" id="g-secs"></div>
+        <div class="stagehint" id="g-hint"></div>
+      </div>
+    </div>
+    <div class="dial" id="g-dial">
+      <div class="trk"><div class="fill"></div><div class="needle"></div></div>
+      <div class="stops" id="g-stops"></div>
+    </div>
+  </div>
+  <div class="slots">
+    <div class="slot" id="slot-artist"><div class="lb" data-t="artist"></div><div class="val"></div><div class="by"></div></div>
+    <div class="slot" id="slot-title"><div class="lb" data-t="title"></div><div class="val"></div><div class="by"></div></div>
+  </div>
+  <div class="card" id="g-guess">
+    <div class="field ac">
+      <label class="lab" for="in-artist" data-t="artist"></label>
+      <div class="row">
+        <input id="in-artist" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" data-tp="guessArtistPh">
+        <button class="btn small" data-guess="artist" data-t="guess"></button>
+      </div>
+      <ul class="ac-list" id="ac-artist" hidden></ul>
+    </div>
+    <div class="field ac" style="margin-bottom:0">
+      <label class="lab" for="in-title" data-t="title"></label>
+      <div class="row">
+        <input id="in-title" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" data-tp="guessTitlePh">
+        <button class="btn small" data-guess="title" data-t="guess"></button>
+      </div>
+      <ul class="ac-list" id="ac-title" hidden></ul>
+    </div>
+  </div>
+  <div class="card hidden" id="g-reveal">
+    <div class="rhead" id="g-rhead"></div>
+    <div class="rbody">
+      <img id="g-cover" alt="">
+      <div><div class="rtitle" id="g-rtitle"></div><div class="rartist" id="g-rartist"></div></div>
+    </div>
+    <a class="btn go block" id="g-listen" target="_blank" rel="noopener"></a>
+  </div>
+  <p class="hint" id="g-wait"></p>
+  <div class="card">
+    <h3 data-t="scores"></h3>
+    <ol class="board" id="g-board"></ol>
+  </div>
+  <div class="center hidden" id="g-endwrap"><button class="link" id="g-end" data-t="endGame"></button></div>
+  <div class="hostbar hidden" id="g-bar">
+    <div class="hostcap" data-t="hostControls"></div>
+    <div class="inner" id="g-bar-inner"></div>
+  </div>
+</section>
+
+<!-- END -->
+<section class="screen" id="s-end">
+  <div class="top">
+    <div class="brand"><svg aria-hidden="true"><use href="#i-bell"/></svg>Rings a Bell</div>
+    <div class="tools"><button class="iconbtn" data-act="settings" data-ta="settings"><svg><use href="#i-gear"/></svg></button></div>
+  </div>
+  <div class="card center">
+    <svg class="bigbell" id="end-bell" aria-hidden="true"><use href="#i-bell"/></svg>
+    <h2 data-t="gameOver"></h2>
+    <p class="winner" id="e-winner"></p>
+  </div>
+  <div class="card"><ol class="board big" id="e-board"></ol></div>
+  <p class="hint" id="e-wait" data-t="waitHost"></p>
+  <button class="btn block" id="btn-leave-end" data-t="leave"></button>
+  <div class="hostbar hidden" id="e-bar"><div class="inner">
+    <button class="btn primary" id="btn-again" data-t="playAgain"></button>
+    <button class="btn" id="btn-newmusic" data-t="newMusic"></button>
+  </div></div>
+</section>
+
+</div>
+
+<dialog id="dlg">
+  <h2 data-t="settings"></h2>
+  <div class="field">
+    <span class="lab" data-t="language"></span>
+    <div class="seg" id="lang-seg">
+      <button type="button" data-lang="en">English</button>
+      <button type="button" data-lang="he">עברית</button>
+    </div>
+  </div>
+  <div class="field">
+    <span class="lab" data-t="musicApp"></span>
+    <div class="seg" id="app-seg"></div>
+  </div>
+  <div class="stack">
+    <button class="btn block hidden" id="dlg-leave" data-t="leave"></button>
+    <button class="btn primary block" id="dlg-close" data-t="close"></button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+(() => {
+'use strict';
+
+/* ---------- Firebase ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyBokY6b3ghYWKhDtKeySg3frZNu6oe-wRM",
+  authDomain: "rings-a-bell-2227b.firebaseapp.com",
+  databaseURL: "https://rings-a-bell-2227b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "rings-a-bell-2227b",
+  storageBucket: "rings-a-bell-2227b.firebasestorage.app",
+  messagingSenderId: "356529021544",
+  appId: "1:356529021544:web:bccccdae21ba07372bd1dd"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const SV = firebase.database.ServerValue.TIMESTAMP;
+let serverOffset = 0;
+db.ref('.info/serverTimeOffset').on('value', s => { serverOffset = s.val() || 0; });
+const now = () => Date.now() + serverOffset;
+
+/* ---------- Game constants ---------- */
+const SLICES = [0.5, 1, 2, 4, 8, 15, 30];   // seconds heard at each step
+const MAX_LEVEL = SLICES.length - 1;
+const MAX_TRACKS = 2000;
+
+/* ---------- Text (English / Hebrew) ---------- */
+const STR = {
+  en: {
+    tagline: "Guess the song from a split second.",
+    yourName: "Your name", namePh: "e.g. Ruth",
+    createRoom: "Create a room", joinTitle: "Got a room code?", codePh: "4-digit code", join: "Join",
+    rejoin: "Back to room {code}",
+    needName: "Type your name first.", needCode: "Type the 4-digit room code.",
+    roomNotFound: "There's no room with code {code}. Check the code and try again.",
+    roomGone: "This room was closed.",
+    netErr: "No connection. Check the internet and try again.",
+    dzCredit: "Music previews by Deezer",
+    back: "Back", setupTitle: "Pick the music",
+    playlistLabel: "Deezer playlist link", playlistPh: "Paste a link from deezer.com", load: "Load",
+    orSearch: "Or search for a playlist by name", searchPh: "Playlist name", search: "Search",
+    shortLink: "Short share links can't be read here. Search for the playlist by name instead, or open the link in a browser and copy the full address.",
+    badLink: "That doesn't look like a Deezer playlist link.",
+    noResults: "No playlists found. Try other words.",
+    songsCount: "{n} songs",
+    loadingPl: "Loading songs… {n}",
+    plReady: "{n} songs ready to play",
+    plEmpty: "This playlist has no playable songs. Check that it's public, or pick another one.",
+    plError: "Couldn't load this playlist. Check that it's public and try again.",
+    endTitle: "When does the game end?",
+    endSongs: "After a number of songs", endTime: "After a set time", endManual: "When we decide",
+    songsUnit: "songs", minutesUnit: "minutes",
+    openRoom: "Open the room", saveChanges: "Save changes",
+    pickPlaylistFirst: "Load a playlist first.",
+    lobbyCode: "Room code", share: "Invite players", copied: "Invite link copied",
+    shareText: "Join my Rings a Bell game! Room code: {code}",
+    players: "Players", host: "Host", me: "(me)",
+    changeSettings: "Change music or rules",
+    endsSongs: "Ends after {n} songs", endsTime: "Ends after {n} minutes", endsManual: "Ends when the host decides",
+    waitStart: "Waiting for the game to start…", waitHost: "Waiting for the host…",
+    startGame: "Start the game",
+    songOf: "Song {n} of {total}", songN: "Song {n}",
+    minLeft: "{n} min left", timeUp: "Time's up, last song",
+    secUnit: "sec",
+    tapReplay: "Tap to hear it again", tapToPlay: "Tap to hear the clip", soundOff: "Sound is off on this phone",
+    loadingSong: "Loading the song…", noPreview: "This song can't be played right now.",
+    artist: "Artist", title: "Song",
+    guessArtistPh: "Who's singing?", guessTitlePh: "What's the song?", guess: "Guess",
+    nope: "Not this one, try again", tooLate: "Someone beat you to it!",
+    gotArtist: "{name} named the artist! +1", gotTitle: "{name} named the song! +1", gotBoth: "{name} got both! 3 points",
+    namedBy: "by {name}",
+    revealFound: "Got it!", revealGaveUp: "The answer was",
+    listenFull: "Full song on {app}",
+    waitNext: "The host moves on to the next song.",
+    scores: "Scores",
+    hostControls: "Host controls",
+    addSlice: "Play a bit more", giveUp: "Not a clue", nextSong: "Next song", endGame: "End game",
+    confirmEnd: "End the game now?",
+    outOfSongs: "That was the last song in the playlist.",
+    gameOver: "Game over", winner: "{name} wins!", tie: "It's a tie: {names}",
+    playAgain: "Play again", newMusic: "Change the music", leave: "Leave room",
+    settings: "Settings", language: "Language", musicApp: "Open full songs in", close: "Done",
+    soundBtn: "Sound on this phone"
+  },
+  he: {
+    tagline: "מזהים את השיר מתוך שבריר שנייה.",
+    yourName: "השם שלך", namePh: "למשל: רות",
+    createRoom: "פתיחת חדר", joinTitle: "קיבלת קוד חדר?", codePh: "קוד בן 4 ספרות", join: "הצטרפות",
+    rejoin: "חזרה לחדר {code}",
+    needName: "צריך להקליד שם קודם.", needCode: "צריך להקליד קוד חדר בן 4 ספרות.",
+    roomNotFound: "אין חדר עם הקוד {code}. כדאי לבדוק את הקוד ולנסות שוב.",
+    roomGone: "החדר נסגר.",
+    netErr: "אין חיבור. כדאי לבדוק את האינטרנט ולנסות שוב.",
+    dzCredit: "קטעי המוזיקה באדיבות דיזר",
+    back: "חזרה", setupTitle: "בחירת המוזיקה",
+    playlistLabel: "קישור לפלייליסט בדיזר", playlistPh: "הדבקת קישור מ-deezer.com", load: "טעינה",
+    orSearch: "או חיפוש פלייליסט לפי שם", searchPh: "שם הפלייליסט", search: "חיפוש",
+    shortLink: "אי אפשר לקרוא כאן קישורי שיתוף מקוצרים. אפשר לחפש את הפלייליסט לפי שם, או לפתוח את הקישור בדפדפן ולהעתיק את הכתובת המלאה.",
+    badLink: "זה לא נראה כמו קישור לפלייליסט בדיזר.",
+    noResults: "לא נמצאו פלייליסטים. כדאי לנסות מילים אחרות.",
+    songsCount: "{n} שירים",
+    loadingPl: "טוען שירים… {n}",
+    plReady: "{n} שירים מוכנים למשחק",
+    plEmpty: "אין בפלייליסט הזה שירים שאפשר לנגן. כדאי לוודא שהוא ציבורי, או לבחור פלייליסט אחר.",
+    plError: "לא הצלחנו לטעון את הפלייליסט. כדאי לוודא שהוא ציבורי ולנסות שוב.",
+    endTitle: "מתי המשחק נגמר?",
+    endSongs: "אחרי מספר שירים", endTime: "אחרי זמן מסוים", endManual: "כשנחליט לעצור",
+    songsUnit: "שירים", minutesUnit: "דקות",
+    openRoom: "פתיחת החדר", saveChanges: "שמירת השינויים",
+    pickPlaylistFirst: "צריך לטעון פלייליסט קודם.",
+    lobbyCode: "קוד החדר", share: "הזמנת שחקנים", copied: "קישור ההזמנה הועתק",
+    shareText: "בואו לשחק איתי ב-Rings a Bell! קוד החדר: {code}",
+    players: "שחקנים", host: "מנחה", me: "(אני)",
+    changeSettings: "שינוי מוזיקה או חוקים",
+    endsSongs: "נגמר אחרי {n} שירים", endsTime: "נגמר אחרי {n} דקות", endsManual: "נגמר בהחלטת המנחה",
+    waitStart: "מחכים להתחלת המשחק…", waitHost: "מחכים למנחה…",
+    startGame: "מתחילים!",
+    songOf: "שיר {n} מתוך {total}", songN: "שיר {n}",
+    minLeft: "נותרו {n} דק׳", timeUp: "הזמן נגמר, שיר אחרון",
+    secUnit: "שנ׳",
+    tapReplay: "הקשה לשמיעה חוזרת", tapToPlay: "הקישו כדי לשמוע את הקטע", soundOff: "הצליל כבוי בטלפון הזה",
+    loadingSong: "טוען את השיר…", noPreview: "אי אפשר לנגן את השיר הזה כרגע.",
+    artist: "מבצע", title: "שיר",
+    guessArtistPh: "מי שר?", guessTitlePh: "איזה שיר?", guess: "ניחוש",
+    nope: "לא זה, נסו שוב", tooLate: "מישהו הקדים אותך!",
+    gotArtist: "המבצע זוהה! נקודה ל{name}", gotTitle: "השיר זוהה! נקודה ל{name}", gotBoth: "זיהוי מלא! 3 נקודות ל{name}",
+    namedBy: "על ידי {name}",
+    revealFound: "זוהה!", revealGaveUp: "התשובה הייתה",
+    listenFull: "השיר המלא ב{app}",
+    waitNext: "המעבר לשיר הבא בידי המנחה.",
+    scores: "ניקוד",
+    hostControls: "שליטת המנחה",
+    addSlice: "עוד קצת", giveUp: "התייאשנו", nextSong: "לשיר הבא", endGame: "סיום המשחק",
+    confirmEnd: "לסיים את המשחק עכשיו?",
+    outOfSongs: "זה היה השיר האחרון בפלייליסט.",
+    gameOver: "המשחק נגמר", winner: "{name} בראש!", tie: "תיקו: {names}",
+    playAgain: "משחק נוסף", newMusic: "החלפת מוזיקה", leave: "יציאה מהחדר",
+    settings: "הגדרות", language: "שפה", musicApp: "פתיחת שירים מלאים ב:", close: "סיום",
+    soundBtn: "צליל בטלפון הזה"
+  }
+};
+
+const APPS = {
+  spotify: { en: "Spotify", he: "ספוטיפיי", url: tr => 'https://open.spotify.com/search/' + encodeURIComponent(tr.t + ' ' + tr.a) },
+  ytmusic: { en: "YouTube Music", he: "יוטיוב מיוזיק", url: tr => 'https://music.youtube.com/search?q=' + encodeURIComponent(tr.t + ' ' + tr.a) },
+  youtube: { en: "YouTube", he: "יוטיוב", url: tr => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(tr.t + ' ' + tr.a) },
+  deezer:  { en: "Deezer", he: "דיזר", url: tr => 'https://www.deezer.com/track/' + tr.id }
+};
+
+/* ---------- Helpers ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('rab:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('rab:' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const norm = s => String(s || '').toLowerCase().normalize('NFKD')
+  .replace(/[\u0300-\u036f\u0591-\u05C7]/g, '')
+  .replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+const me = { pid: LS.get('pid', null), name: LS.get('name', '') };
+if (!me.pid) { me.pid = 'p' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); LS.set('pid', me.pid); }
+const prefs = {
+  lang: LS.get('lang', (navigator.language || '').toLowerCase().startsWith('he') ? 'he' : 'en'),
+  app: LS.get('app', 'spotify'),
+  sound: LS.get('sound', true)
+};
+
+function t(k, v) {
+  v = v || {};
+  const table = STR[prefs.lang] || STR.en;
+  const s = (k in table) ? table[k] : (STR.en[k] || k);
+  return s.replace(/\{(\w+)\}/g, (_, x) => (v[x] != null ? v[x] : ''));
+}
+const appName = id => (APPS[id] || APPS.spotify)[prefs.lang] || APPS.spotify.en;
+const secLabel = s => (s === 0.5 ? '½' : String(s));
+
+let toastTimer = null;
+function toast(msg, good) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.toggle('good', !!good);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+function ring(el) {
+  if (!el) return;
+  el.classList.remove('ring'); void el.getBoundingClientRect(); el.classList.add('ring');
+}
+
+/* ---------- Deezer (JSONP, no key needed) ---------- */
+let jsonpN = 0;
+function dz(path, params) {
+  return new Promise((resolve, reject) => {
+    const cb = '__dz' + (++jsonpN) + '_' + Date.now();
+    const q = new URLSearchParams(Object.assign({}, params || {}, { output: 'jsonp', callback: cb }));
+    const s = document.createElement('script');
+    const timer = setTimeout(() => { done(); reject(new Error('timeout')); }, 15000);
+    function done() { clearTimeout(timer); delete window[cb]; s.remove(); }
+    window[cb] = data => {
+      done();
+      if (!data || data.error) reject(new Error((data && data.error && data.error.message) || 'deezer'));
+      else resolve(data);
+    };
+    s.onerror = () => { done(); reject(new Error('network')); };
+    s.src = 'https://api.deezer.com/' + path + '?' + q.toString();
+    document.head.appendChild(s);
+  });
+}
+
+/* ---------- Sound ---------- */
+const P = { audio: new Audio(), id: null, ready: null, meta: null, token: 0, stopT: null, needTap: false, playing: false, loading: false, err: false };
+P.audio.preload = 'auto';
+P.audio.addEventListener('play', () => { P.playing = true; updatePlayBtn(); });
+P.audio.addEventListener('pause', () => { P.playing = false; updatePlayBtn(); });
+P.audio.addEventListener('ended', () => { P.playing = false; updatePlayBtn(); });
+
+function loadTrack(id) {
+  if (P.id === id && P.ready) return P.ready;
+  stopAudio();
+  P.id = id; P.meta = null; P.err = false; P.loading = true; updateStageHint();
+  const pr = dz('track/' + id).then(d => {
+    if (!d.preview) throw new Error('nopreview');
+    if (P.id !== id) return;
+    P.meta = d;
+    return new Promise((resolve, reject) => {
+      const a = P.audio;
+      const ok = () => { clean(); resolve(); };
+      const bad = () => { clean(); reject(new Error('audio')); };
+      const tm = setTimeout(ok, 8000);
+      function clean() { clearTimeout(tm); a.removeEventListener('canplaythrough', ok); a.removeEventListener('error', bad); }
+      a.addEventListener('canplaythrough', ok);
+      a.addEventListener('error', bad);
+      a.src = d.preview;
+      a.load();
+    });
+  });
+  P.ready = pr;
+  pr.then(() => { if (P.id === id) { P.loading = false; updateStageHint(); renderReveal(); } },
+          () => { if (P.id === id) { P.ready = null; P.loading = false; P.err = true; updateStageHint(); } });
+  return pr;
+}
+
+async function playClip(id, sec) {
+  const token = ++P.token;
+  clearTimeout(P.stopT);
+  try { await loadTrack(id); } catch (e) { return; }
+  if (token !== P.token || P.id !== id) return;
+  const a = P.audio;
+  a.pause();
+  try { a.currentTime = 0; } catch (e) {}
+  try {
+    await a.play();
+    P.needTap = false;
+  } catch (e) {
+    P.needTap = true; updatePlayBtn(); updateStageHint(); return;
+  }
+  if (token !== P.token) { a.pause(); return; }
+  updatePlayBtn(); updateStageHint();
+  if (sec) P.stopT = setTimeout(() => { if (token === P.token) a.pause(); }, sec * 1000);
+}
+function stopAudio() { P.token++; clearTimeout(P.stopT); try { P.audio.pause(); } catch (e) {} }
+
+let actx = null;
+function unlockAudio() {
+  try {
+    if (!actx) { const C = window.AudioContext || window.webkitAudioContext; if (C) actx = new C(); }
+    if (actx && actx.state === 'suspended') actx.resume();
+  } catch (e) {}
+}
+document.addEventListener('pointerdown', unlockAudio, { passive: true });
+function ding() {
+  if (!prefs.sound || !actx) return;
+  const t0 = actx.currentTime;
+  [[1318.5, 0.16], [2637, 0.06], [3951, 0.025]].forEach(([f, g]) => {
+    const o = actx.createOscillator(), v = actx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    v.gain.setValueAtTime(0.0001, t0);
+    v.gain.exponentialRampToValueAtTime(g, t0 + 0.01);
+    v.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.3);
+    o.connect(v); v.connect(actx.destination);
+    o.start(t0); o.stop(t0 + 1.35);
+  });
+}
+
+/* ---------- App state ---------- */
+const S = {
+  screen: 'home', code: null, room: null, isHost: false, editing: false,
+  ref: null, roomCb: null, connRef: null, connCb: null,
+  setupMode: 'create', pl: null, plLoading: false,
+  lastKey: null, prevRound: null, tracksVer: null, renderedNum: null,
+  artists: [], titles: []
+};
+
+function show(name) {
+  if (S.screen !== name) window.scrollTo(0, 0);
+  S.screen = name;
+  $$('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + name));
+}
+
+function applyLang() {
+  const he = prefs.lang === 'he';
+  document.documentElement.lang = he ? 'he' : 'en';
+  document.documentElement.dir = he ? 'rtl' : 'ltr';
+  $$('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  $$('[data-tp]').forEach(el => { el.placeholder = t(el.dataset.tp); });
+  $$('[data-ta]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.ta)); });
+  $$('#lang-seg [data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === prefs.lang)));
+  $('#app-seg').innerHTML = Object.keys(APPS).map(k =>
+    `<button type="button" data-app="${k}" aria-pressed="${k === prefs.app}">${esc(appName(k))}</button>`).join('');
+  renderSoundBtns();
+  renderSetupSave();
+  refreshRejoin();
+  if (S.room) renderCurrent();
+}
+
+function renderSoundBtns() {
+  $$('[data-act="sound"]').forEach(b => {
+    b.setAttribute('aria-pressed', String(!!prefs.sound));
+    b.setAttribute('aria-label', t('soundBtn'));
+    b.innerHTML = `<svg><use href="#${prefs.sound ? 'i-bell' : 'i-bell-off'}"/></svg>`;
+  });
+}
+
+/* ---------- Home ---------- */
+function requireName() {
+  const n = $('#name').value.trim().slice(0, 20);
+  if (!n) { toast(t('needName')); $('#name').focus(); return false; }
+  me.name = n; LS.set('name', n);
+  return true;
+}
+
+async function refreshRejoin() {
+  const btn = $('#btn-rejoin');
+  const last = LS.get('last', null);
+  btn.classList.add('hidden');
+  if (!last || S.code) return;
+  try {
+    const s = await db.ref(`rooms/${last}/players/${me.pid}/name`).get();
+    if (s.exists() && !S.code) { btn.textContent = t('rejoin', { code: last }); btn.dataset.code = last; btn.classList.remove('hidden'); }
+  } catch (e) {}
+}
+
+async function joinRoom(code) {
+  code = String(code || '').replace(/\D/g, '').slice(0, 4);
+  if (code.length !== 4) { toast(t('needCode')); return; }
+  try {
+    const hs = await db.ref(`rooms/${code}/hostId`).get();
+    if (!hs.exists()) { toast(t('roomNotFound', { code })); return; }
+    const pref = db.ref(`rooms/${code}/players/${me.pid}`);
+    const ps = await pref.get();
+    if (ps.exists()) await pref.update({ name: me.name, online: true });
+    else await pref.set({ name: me.name, score: 0, online: true, joinedAt: SV });
+    enterRoom(code);
+  } catch (e) { toast(t('netErr')); }
+}
+
+function enterRoom(code) {
+  detach();
+  S.code = code; S.room = null; S.lastKey = null; S.prevRound = null; S.tracksVer = null; S.renderedNum = null; S.editing = false;
+  LS.set('last', code);
+  try { history.replaceState(null, '', location.pathname + '?room=' + code); } catch (e) {}
+  $('#game-code').textContent = code;
+  const pref = db.ref(`rooms/${code}/players/${me.pid}`);
+  S.connRef = db.ref('.info/connected');
+  S.connCb = S.connRef.on('value', s => {
+    if (s.val() === true) { pref.child('online').onDisconnect().set(false); pref.child('online').set(true); }
+  });
+  S.ref = db.ref('rooms/' + code);
+  S.roomCb = S.ref.on('value', snap => onRoom(snap.val()), () => toast(t('netErr')));
+}
+
+function detach() {
+  if (S.ref && S.roomCb) S.ref.off('value', S.roomCb);
+  if (S.connRef && S.connCb) S.connRef.off('value', S.connCb);
+  S.ref = S.roomCb = S.connRef = S.connCb = null;
+}
+
+function leaveRoom(silent) {
+  if (S.code) {
+    const oref = db.ref(`rooms/${S.code}/players/${me.pid}/online`);
+    oref.onDisconnect().cancel(); oref.set(false).catch(() => {});
+  }
+  detach(); stopAudio();
+  S.code = null; S.room = null; S.isHost = false; S.editing = false;
+  LS.set('last', null);
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  $('#dlg-leave').classList.add('hidden');
+  show('home');
+  if (!silent) refreshRejoin();
+}
+
+/* ---------- Room updates ---------- */
+function onRoom(room) {
+  if (!room) { toast(t('roomGone')); leaveRoom(true); return; }
+  S.room = room;
+  S.isHost = room.hostId === me.pid;
+  const ver = room.settings && room.settings.ver;
+  if (ver !== S.tracksVer) { S.tracksVer = ver; buildLists(room.tracks || []); }
+  notify(room);
+  S.prevRound = room.round ? Object.assign({}, room.round) : null;
+  if (room.status !== 'ended') S.endRung = false;
+  $('#dlg-leave').classList.remove('hidden');
+  renderCurrent();
+  if (room.status === 'playing') handleAudio();
+  else { stopAudio(); S.lastKey = null; }
+}
+
+function renderCurrent() {
+  const room = S.room; if (!room) return;
+  if (S.editing) return;
+  if (room.status === 'lobby') { show('lobby'); renderLobby(); }
+  else if (room.status === 'playing') { show('game'); renderGame(); }
+  else if (room.status === 'ended') { show('end'); renderEnd(); }
+}
+
+function buildLists(tracks) {
+  const uniq = (arr) => {
+    const m = new Map();
+    arr.forEach(v => { const n = norm(v); if (n && !m.has(n)) m.set(n, { v, n, w: n.split(' ') }); });
+    return Array.from(m.values()).sort((a, b) => a.v.localeCompare(b.v));
+  };
+  S.artists = uniq(tracks.map(x => x && x.a));
+  S.titles = uniq(tracks.map(x => x && x.t));
+}
+
+function playerName(id) {
+  const p = S.room && S.room.players && S.room.players[id];
+  return p ? p.name : '?';
+}
+
+function notify(room) {
+  const r = room.round, p = S.prevRound;
+  if (!r || !p || r.num !== p.num || room.status !== 'playing') return;
+  const newA = r.artistBy && !p.artistBy, newT = r.titleBy && !p.titleBy;
+  if (!newA && !newT) return;
+  const who = newT ? r.titleBy : r.artistBy;
+  const both = r.artistBy && r.artistBy === r.titleBy && who === r.artistBy;
+  const msg = both ? t('gotBoth', { name: playerName(who) }) : newT ? t('gotTitle', { name: playerName(who) }) : t('gotArtist', { name: playerName(who) });
+  toast(msg, true);
+  ding();
+  ring($('#game-bell'));
+}
+
+function handleAudio() {
+  const room = S.room, r = room.round;
+  if (!r || !room.tracks || !room.tracks[r.idx]) return;
+  const tr = room.tracks[r.idx];
+  const key = r.num + '|' + r.level + '|' + r.state;
+  if (key === S.lastKey) return;
+  S.lastKey = key;
+  if (!prefs.sound) { loadTrack(tr.id).catch(() => {}); return; }
+  playClip(tr.id, r.state === 'guessing' ? SLICES[r.level || 0] : null);
+}
+
+/* ---------- Lobby ---------- */
+function sortedPlayers() {
+  const pl = (S.room && S.room.players) || {};
+  return Object.keys(pl).map(id => Object.assign({ id }, pl[id]));
+}
+
+function settingsSummary() {
+  const st = S.room.settings || {};
+  if (st.endMode === 'songs') return t('endsSongs', { n: st.endValue });
+  if (st.endMode === 'time') return t('endsTime', { n: st.endValue });
+  return t('endsManual');
+}
+
+function renderLobby() {
+  const room = S.room;
+  $('#lobby-code').textContent = S.code;
+  const ps = sortedPlayers().sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
+  $('#lobby-count').textContent = ps.length;
+  $('#lobby-players').innerHTML = ps.map(p => `<li class="${p.online === false ? 'off' : ''}">
+      <span>${esc(p.name)}${p.id === me.pid ? ' ' + esc(t('me')) : ''}</span>
+      ${p.id === room.hostId ? `<span class="badge">${esc(t('host'))}</span>` : ''}</li>`).join('');
+  const st = room.settings || {};
+  const n = (room.tracks || []).length;
+  $('#lobby-sum').innerHTML = `${st.plPic ? `<img src="${esc(st.plPic)}" alt="">` : ''}
+    <div><div class="t">${esc(st.plTitle || '')}</div><div class="s">${esc(t('songsCount', { n }))}</div><div class="s">${esc(settingsSummary())}</div></div>`;
+  $('#lobby-change').classList.toggle('hidden', !S.isHost);
+  $('#lobby-bar').classList.toggle('hidden', !S.isHost);
+  $('#lobby-wait').classList.toggle('hidden', S.isHost);
+}
+
+/* ---------- Game ---------- */
+function curTrack() {
+  const r = S.room && S.room.round;
+  return r && S.room.tracks ? S.room.tracks[r.idx] : null;
+}
+
+function roundLabel() {
+  const room = S.room, st = room.settings || {}, r = room.round;
+  const n = r ? r.num : 0;
+  if (st.endMode === 'songs') return t('songOf', { n, total: Math.min(st.endValue, (room.tracks || []).length) });
+  return t('songN', { n });
+}
+function timeLabel() {
+  const room = S.room, st = room.settings || {};
+  if (st.endMode !== 'time' || !room.startedAt) return '';
+  const left = st.endValue * 60000 - (now() - room.startedAt);
+  return left > 0 ? t('minLeft', { n: Math.ceil(left / 60000) }) : t('timeUp');
+}
+
+function renderGame() {
+  const room = S.room, r = room.round, tr = curTrack();
+  if (!r || !tr) return;
+  const revealed = r.state === 'revealed';
+
+  if (S.renderedNum !== r.num) {
+    S.renderedNum = r.num;
+    $('#in-artist').value = ''; $('#in-title').value = '';
+    $('#ac-artist').hidden = true; $('#ac-title').hidden = true;
+  }
+
+  $('#g-round').textContent = roundLabel();
+  $('#g-time').textContent = timeLabel();
+
+  const lvl = revealed ? MAX_LEVEL : (r.level || 0);
+  $('#g-dial').style.setProperty('--p', String(lvl / MAX_LEVEL));
+  $('#g-stops').innerHTML = SLICES.map((s, i) => `<span class="${i <= lvl ? 'on' : ''}">${secLabel(s)}</span>`).join('');
+  $('#g-secs').innerHTML = `${secLabel(SLICES[lvl])}<small>${esc(t('secUnit'))}</small>`;
+
+  slot('#slot-artist', r.artistBy, tr.a, revealed);
+  slot('#slot-title', r.titleBy, tr.t, revealed);
+
+  $('#g-guess').classList.toggle('hidden', revealed);
+  $('#in-artist').disabled = !!r.artistBy;
+  $('#in-title').disabled = !!r.titleBy;
+  $$('[data-guess="artist"]').forEach(b => b.disabled = !!r.artistBy);
+  $$('[data-guess="title"]').forEach(b => b.disabled = !!r.titleBy);
+
+  renderReveal();
+  updatePlayBtn(); updateStageHint();
+
+  $('#g-wait').textContent = (revealed && !S.isHost) ? t('waitNext') : '';
+  renderBoard('#g-board', false);
+
+  $('#g-bar').classList.toggle('hidden', !S.isHost);
+  $('#g-endwrap').classList.toggle('hidden', !S.isHost);
+  if (S.isHost) {
+    const inner = $('#g-bar-inner');
+    const want = revealed ? 'rev' : 'g' + (r.level >= MAX_LEVEL ? 'max' : '');
+    if (inner.dataset.mode !== want || inner.dataset.lang !== prefs.lang) {
+      inner.dataset.mode = want; inner.dataset.lang = prefs.lang;
+      inner.innerHTML = revealed
+        ? `<button class="btn primary" data-host="next">${esc(t('nextSong'))}</button>`
+        : `<button class="btn" data-host="more" ${r.level >= MAX_LEVEL ? 'disabled' : ''}>${esc(t('addSlice'))}</button>
+           <button class="btn primary" data-host="giveup">${esc(t('giveUp'))}</button>`;
+    }
+  }
+}
+
+function slot(sel, by, value, revealed) {
+  const el = $(sel);
+  el.classList.toggle('found', !!by);
+  el.classList.toggle('missed', !by && revealed);
+  el.querySelector('.val').textContent = (by || revealed) ? value : '?';
+  el.querySelector('.by').textContent = by ? t('namedBy', { name: playerName(by) }) : '';
+}
+
+function renderReveal() {
+  const room = S.room;
+  if (!room || room.status !== 'playing' || !room.round) return;
+  const r = room.round, tr = curTrack();
+  const revealed = r.state === 'revealed';
+  $('#g-reveal').classList.toggle('hidden', !revealed);
+  if (!revealed || !tr) return;
+  const full = r.artistBy && r.titleBy;
+  $('#g-rhead').textContent = full ? t('revealFound') : t('revealGaveUp');
+  $('#g-rtitle').textContent = tr.t;
+  $('#g-rartist').textContent = tr.a;
+  const cover = P.meta && P.meta.id === tr.id && P.meta.album ? (P.meta.album.cover_medium || P.meta.album.cover || '') : '';
+  const img = $('#g-cover');
+  if (cover) { if (img.getAttribute('src') !== cover) img.src = cover; img.classList.remove('hidden'); }
+  else img.classList.add('hidden');
+  const a = $('#g-listen');
+  a.href = (APPS[prefs.app] || APPS.spotify).url(tr);
+  a.textContent = t('listenFull', { app: appName(prefs.app) });
+}
+
+function updatePlayBtn() {
+  const btn = $('#g-play'); if (!btn) return;
+  const r = S.room && S.room.round;
+  const revealed = r && r.state === 'revealed';
+  let icon = 'i-replay';
+  if (revealed) icon = P.playing ? 'i-pause' : 'i-play';
+  else if (P.needTap) icon = 'i-play';
+  btn.innerHTML = `<svg><use href="#${icon}"/></svg>`;
+  btn.classList.toggle('need', P.needTap);
+  btn.setAttribute('aria-label', revealed ? (P.playing ? 'Pause' : 'Play') : t('tapReplay'));
+}
+
+function updateStageHint() {
+  const el = $('#g-hint'); if (!el) return;
+  const r = S.room && S.room.round;
+  let h = '';
+  if (P.err) h = t('noPreview');
+  else if (P.loading) h = t('loadingSong');
+  else if (P.needTap) h = t('tapToPlay');
+  else if (!prefs.sound) h = t('soundOff');
+  else if (r && r.state === 'guessing') h = t('tapReplay');
+  el.textContent = h;
+}
+
+function renderBoard(sel, big) {
+  const room = S.room;
+  const ps = sortedPlayers().sort((a, b) => (b.score || 0) - (a.score || 0) || String(a.name).localeCompare(String(b.name)));
+  let rank = 0, prev = null;
+  $(sel).innerHTML = ps.map((p, i) => {
+    if ((p.score || 0) !== prev) { rank = i + 1; prev = p.score || 0; }
+    return `<li class="${p.id === me.pid ? 'me' : ''} ${p.online === false ? 'off' : ''}">
+      <span class="rk">${rank}</span><span class="nm">${esc(p.name)}${p.id === room.hostId ? ` <span class="badge">${esc(t('host'))}</span>` : ''}</span>
+      <span class="sc">${p.score || 0}</span></li>`;
+  }).join('');
+}
+
+/* ---------- Guessing ---------- */
+function setupAC(kind) {
+  const input = $('#in-' + kind), list = $('#ac-' + kind);
+  const hide = () => { list.hidden = true; };
+  const fill = () => {
+    const q = norm(input.value);
+    if (!q) { hide(); return; }
+    const all = kind === 'artist' ? S.artists : S.titles;
+    const a = [], b = [], c = [];
+    for (const o of all) {
+      if (o.n.startsWith(q)) a.push(o);
+      else if (o.w.some(w => w.startsWith(q))) b.push(o);
+      else if (o.n.includes(q)) c.push(o);
+      if (a.length >= 8) break;
+    }
+    const res = a.concat(b, c).slice(0, 8);
+    if (!res.length) { hide(); return; }
+    list.innerHTML = res.map(o => `<li><button type="button" data-v="${esc(o.v)}">${esc(o.v)}</button></li>`).join('');
+    list.hidden = false;
+  };
+  input.addEventListener('input', fill);
+  input.addEventListener('focus', fill);
+  input.addEventListener('blur', () => setTimeout(hide, 180));
+  list.addEventListener('pointerdown', e => e.preventDefault());
+  list.addEventListener('click', e => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    input.value = btn.dataset.v; hide(); submitGuess(kind);
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); hide(); submitGuess(kind); }
+    if (e.key === 'Escape') hide();
+  });
+}
+
+async function submitGuess(kind) {
+  const room = S.room, r = room && room.round, tr = curTrack();
+  const input = $('#in-' + kind);
+  const text = input.value.trim();
+  if (!r || !tr || r.state !== 'guessing' || !text) return;
+  const target = kind === 'artist' ? tr.a : tr.t;
+  if (norm(text) !== norm(target)) {
+    input.value = '';
+    input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
+    toast(t('nope'));
+    return;
+  }
+  const field = kind === 'artist' ? 'artistBy' : 'titleBy';
+  const other = kind === 'artist' ? 'titleBy' : 'artistBy';
+  const num = r.num;
+  let pts = 0;
+  try {
+    const res = await S.ref.child('round').transaction(cur => {
+      if (!cur || cur.num !== num || cur.state !== 'guessing' || cur[field]) return;
+      cur[field] = me.pid;
+      pts = cur[other] === me.pid ? 2 : 1;
+      if (cur.artistBy && cur.titleBy) cur.state = 'revealed';
+      return cur;
+    });
+    if (!res.committed) { toast(t('tooLate')); return; }
+    await S.ref.child('players/' + me.pid + '/score').transaction(s => (s || 0) + pts);
+  } catch (e) { toast(t('netErr')); }
+}
+
+/* ---------- Host actions ---------- */
+function pickIndex(played) {
+  const tracks = S.room.tracks || [];
+  const avail = [];
+  for (let i = 0; i < tracks.length; i++) if (!(played && played[i])) avail.push(i);
+  return avail.length ? avail[Math.floor(Math.random() * avail.length)] : -1;
+}
+
+async function startGame() {
+  const idx = pickIndex(null);
+  if (idx < 0) return;
+  const up = { status: 'playing', startedAt: SV, played: { [idx]: true }, round: { num: 1, idx, level: 0, state: 'guessing' } };
+  sortedPlayers().forEach(p => { up['players/' + p.id + '/score'] = 0; });
+  try { await S.ref.update(up); } catch (e) { toast(t('netErr')); }
+}
+
+async function nextSong() {
+  const room = S.room, st = room.settings || {}, r = room.round;
+  const num = r ? r.num : 0;
+  if (st.endMode === 'songs' && num >= st.endValue) return endGame();
+  if (st.endMode === 'time' && room.startedAt && now() - room.startedAt >= st.endValue * 60000) return endGame();
+  const idx = pickIndex(room.played);
+  if (idx < 0) { toast(t('outOfSongs')); return endGame(); }
+  const up = {};
+  up['played/' + idx] = true;
+  up.round = { num: num + 1, idx, level: 0, state: 'guessing' };
+  try { await S.ref.update(up); } catch (e) { toast(t('netErr')); }
+}
+
+async function endGame() {
+  try { await S.ref.update({ status: 'ended' }); } catch (e) { toast(t('netErr')); }
+}
+
+async function hostAction(act, btn) {
+  if (!S.isHost || !S.ref) return;
+  if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
+  if (act === 'more') {
+    S.ref.child('round').transaction(r => {
+      if (!r || r.state !== 'guessing' || (r.level || 0) >= MAX_LEVEL) return;
+      r.level = (r.level || 0) + 1; return r;
+    });
+  } else if (act === 'giveup') {
+    S.ref.child('round').transaction(r => {
+      if (!r || r.state !== 'guessing') return;
+      r.state = 'revealed'; r.gaveUp = true; return r;
+    });
+  } else if (act === 'next') {
+    nextSong();
+  }
+}
+
+/* ---------- End ---------- */
+function renderEnd() {
+  renderBoard('#e-board', true);
+  const ps = sortedPlayers();
+  const top = Math.max(0, ...ps.map(p => p.score || 0));
+  const winners = ps.filter(p => (p.score || 0) === top);
+  $('#e-winner').textContent = !ps.length ? '' : winners.length === 1
+    ? t('winner', { name: winners[0].name })
+    : t('tie', { names: winners.map(w => w.name).join(', ') });
+  $('#e-bar').classList.toggle('hidden', !S.isHost);
+  $('#e-wait').classList.toggle('hidden', S.isHost);
+  if (!S.endRung) { S.endRung = true; ring($('#end-bell')); }
+}
+
+/* ---------- Setup (choose playlist + rules) ---------- */
+function openSetup(mode) {
+  S.setupMode = mode;
+  S.editing = mode === 'edit';
+  $('#pl-results').innerHTML = '';
+  $('#pl-msg').textContent = ''; $('#pl-msg').classList.remove('err');
+  $('#pl-link').value = ''; $('#pl-q').value = '';
+  if (mode === 'edit' && S.room) {
+    const st = S.room.settings || {};
+    S.pl = { id: st.plId, title: st.plTitle, pic: st.plPic, tracks: S.room.tracks || [] };
+    const radio = document.querySelector(`input[name="endmode"][value="${st.endMode || 'songs'}"]`);
+    if (radio) radio.checked = true;
+    if (st.endMode === 'songs') $('#end-songs').value = st.endValue;
+    if (st.endMode === 'time') $('#end-min').value = st.endValue;
+  } else {
+    S.pl = null;
+  }
+  renderPicked();
+  renderSetupSave();
+  show('setup');
+}
+
+function renderSetupSave() {
+  $('#setup-save').textContent = S.setupMode === 'edit' ? t('saveChanges') : t('openRoom');
+}
+
+function renderPicked(statusText) {
+  const box = $('#pl-pick');
+  if (!S.pl && !statusText) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  const pic = S.pl ? S.pl.pic : (S.plPending && S.plPending.pic);
+  const img = $('#pl-pic');
+  if (pic) { img.src = pic; img.classList.remove('hidden'); } else img.classList.add('hidden');
+  $('#pl-title').textContent = S.pl ? S.pl.title : (S.plPending ? S.plPending.title : '');
+  $('#pl-status').textContent = statusText || (S.pl ? t('plReady', { n: S.pl.tracks.length }) : '');
+}
+
+function setMsg(text, err) {
+  const m = $('#pl-msg');
+  m.textContent = text || '';
+  m.classList.toggle('err', !!err);
+}
+
+function parsePlaylist(s) {
+  s = String(s || '').trim();
+  if (!s) return null;
+  if (/link\.deezer\.com|deezer\.page\.link|dzr\.page\.link/i.test(s)) return { short: true };
+  const m = s.match(/playlist\/(\d+)/i) || s.match(/^(\d{3,})$/);
+  return m ? { id: m[1] } : null;
+}
+
+async function loadPlaylist(id, hint) {
+  if (S.plLoading) return;
+  S.plLoading = true;
+  S.pl = null; S.plPending = hint || { title: '', pic: '' };
+  setMsg('');
+  renderPicked(t('loadingPl', { n: '' }));
+  try {
+    const info = await dz('playlist/' + id);
+    S.plPending = { title: info.title, pic: info.picture_medium || '' };
+    const total = Math.min(info.nb_tracks || 0, MAX_TRACKS);
+    const seen = new Set(), tracks = [];
+    for (let index = 0; index < total; index += 100) {
+      const page = await dz(`playlist/${id}/tracks`, { index, limit: 100 });
+      (page.data || []).forEach(x => {
+        if (x && x.readable !== false && x.preview && x.artist && !seen.has(x.id)) {
+          seen.add(x.id);
+          tracks.push({ id: x.id, t: x.title_short || x.title, a: x.artist.name });
+        }
+      });
+      renderPicked(t('loadingPl', { n: tracks.length }));
+      if (!page.next) break;
+    }
+    if (!tracks.length) { S.pl = null; renderPicked(' '); setMsg(t('plEmpty'), true); }
+    else { S.pl = { id: String(id), title: info.title, pic: info.picture_medium || '', tracks }; renderPicked(); }
+  } catch (e) {
+    S.pl = null; S.plPending = null; renderPicked();
+    setMsg(e.message === 'network' || e.message === 'timeout' ? t('netErr') : t('plError'), true);
+  } finally {
+    S.plLoading = false;
+  }
+}
+
+async function searchPlaylists() {
+  const q = $('#pl-q').value.trim();
+  if (!q) return;
+  setMsg('');
+  try {
+    const res = await dz('search/playlist', { q, limit: 15 });
+    const items = (res.data || []).filter(p => p && p.id);
+    if (!items.length) { $('#pl-results').innerHTML = ''; setMsg(t('noResults')); return; }
+    $('#pl-results').innerHTML = items.map(p => `<li><button type="button" data-pl="${p.id}" data-title="${esc(p.title)}" data-pic="${esc(p.picture_small || '')}">
+      ${p.picture_small ? `<img src="${esc(p.picture_small)}" alt="">` : '<img alt="">'}
+      <span><span class="rt">${esc(p.title)}</span><span class="rs">${esc(t('songsCount', { n: p.nb_tracks || 0 }))}${p.user && p.user.name ? ' / ' + esc(p.user.name) : ''}</span></span></button></li>`).join('');
+  } catch (e) { setMsg(t('netErr'), true); }
+}
+
+async function uniqueCode() {
+  for (let i = 0; i < 40; i++) {
+    const c = String(1000 + Math.floor(Math.random() * 9000));
+    const s = await db.ref(`rooms/${c}/createdAt`).get();
+    if (!s.exists() || now() - s.val() > 12 * 3600 * 1000) return c;
+  }
+  throw new Error('nocode');
+}
+
+async function saveSetup(btn) {
+  if (S.plLoading) return;
+  if (!S.pl) { toast(t('pickPlaylistFirst')); return; }
+  const mode = (document.querySelector('input[name="endmode"]:checked') || {}).value || 'songs';
+  let val = 0;
+  if (mode === 'songs') val = clamp(parseInt($('#end-songs').value, 10) || 10, 1, 500);
+  if (mode === 'time') val = clamp(parseInt($('#end-min').value, 10) || 30, 1, 600);
+  const settings = { plId: S.pl.id, plTitle: S.pl.title, plPic: S.pl.pic || '', endMode: mode, endValue: val, ver: Date.now() };
+  btn.disabled = true;
+  try {
+    if (S.setupMode === 'create') {
+      const code = await uniqueCode();
+      await db.ref('rooms/' + code).set({
+        hostId: me.pid, createdAt: SV, status: 'lobby', settings, tracks: S.pl.tracks,
+        players: { [me.pid]: { name: me.name, score: 0, online: true, joinedAt: SV } }
+      });
+      enterRoom(code);
+    } else {
+      await S.ref.update({ settings, tracks: S.pl.tracks, status: 'lobby', round: null, played: null });
+      S.editing = false;
+      renderCurrent();
+    }
+  } catch (e) { toast(t('netErr')); }
+  finally { btn.disabled = false; }
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('click', e => {
+  const actEl = e.target.closest('[data-act]');
+  if (actEl) {
+    const act = actEl.dataset.act;
+    if (act === 'settings') $('#dlg').showModal();
+    if (act === 'sound') {
+      prefs.sound = !prefs.sound; LS.set('sound', prefs.sound);
+      renderSoundBtns();
+      if (!prefs.sound) stopAudio();
+      else if (S.room && S.room.status === 'playing') { S.lastKey = null; handleAudio(); }
+      updateStageHint();
+    }
+  }
+  const hostEl = e.target.closest('[data-host]');
+  if (hostEl) hostAction(hostEl.dataset.host, hostEl);
+  const gEl = e.target.closest('[data-guess]');
+  if (gEl) submitGuess(gEl.dataset.guess);
+  const plEl = e.target.closest('[data-pl]');
+  if (plEl) {
+    $('#pl-results').innerHTML = '';
+    loadPlaylist(plEl.dataset.pl, { title: plEl.dataset.title, pic: plEl.dataset.pic });
+  }
+  const langEl = e.target.closest('[data-lang]');
+  if (langEl) { prefs.lang = langEl.dataset.lang; LS.set('lang', prefs.lang); applyLang(); }
+  const appEl = e.target.closest('[data-app]');
+  if (appEl) {
+    prefs.app = appEl.dataset.app; LS.set('app', prefs.app);
+    $$('#app-seg [data-app]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.app === prefs.app)));
+    renderReveal();
+  }
+});
+
+$('#btn-create').addEventListener('click', () => { if (requireName()) openSetup('create'); });
+$('#btn-join').addEventListener('click', () => { if (requireName()) joinRoom($('#join-code').value); });
+$('#join-code').addEventListener('keydown', e => { if (e.key === 'Enter' && requireName()) joinRoom($('#join-code').value); });
+$('#btn-rejoin').addEventListener('click', e => { if (requireName()) joinRoom(e.currentTarget.dataset.code); });
+$('#name').addEventListener('change', () => { const n = $('#name').value.trim(); if (n) { me.name = n.slice(0, 20); LS.set('name', me.name); } });
+
+$('#setup-back').addEventListener('click', () => {
+  if (S.setupMode === 'edit' && S.room) { S.editing = false; renderCurrent(); }
+  else show('home');
+});
+$('#pl-load').addEventListener('click', () => {
+  const p = parsePlaylist($('#pl-link').value);
+  if (!p) { setMsg(t('badLink'), true); return; }
+  if (p.short) { setMsg(t('shortLink'), true); return; }
+  loadPlaylist(p.id);
+});
+$('#pl-link').addEventListener('keydown', e => { if (e.key === 'Enter') $('#pl-load').click(); });
+$('#pl-search').addEventListener('click', searchPlaylists);
+$('#pl-q').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchPlaylists(); } });
+$('#setup-save').addEventListener('click', e => saveSetup(e.currentTarget));
+$('#end-songs').addEventListener('focus', () => { document.querySelector('input[name="endmode"][value="songs"]').checked = true; });
+$('#end-min').addEventListener('focus', () => { document.querySelector('input[name="endmode"][value="time"]').checked = true; });
+
+$('#btn-share').addEventListener('click', async () => {
+  const url = location.origin + location.pathname + '?room=' + S.code;
+  const text = t('shareText', { code: S.code });
+  if (navigator.share) { try { await navigator.share({ title: 'Rings a Bell', text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(text + '\n' + url); toast(t('copied')); } catch (e) { toast(url); }
+});
+$('#lobby-change').addEventListener('click', () => openSetup('edit'));
+$('#btn-start').addEventListener('click', e => { const b = e.currentTarget; b.disabled = true; startGame().finally(() => { b.disabled = false; }); });
+
+$('#g-play').addEventListener('click', () => {
+  const r = S.room && S.room.round, tr = curTrack();
+  if (!r || !tr) return;
+  unlockAudio();
+  if (r.state === 'revealed') {
+    if (P.playing) { stopAudio(); }
+    else if (P.id === tr.id && P.audio.currentTime > 0 && P.audio.currentTime < (P.audio.duration || 30) - 0.3) {
+      P.audio.play().then(() => { P.needTap = false; updatePlayBtn(); updateStageHint(); }).catch(() => {});
+    } else playClip(tr.id, null);
+  } else {
+    playClip(tr.id, SLICES[r.level || 0]);
+  }
+});
+$('#g-listen').addEventListener('click', () => stopAudio());
+$('#g-end').addEventListener('click', () => { if (confirm(t('confirmEnd'))) endGame(); });
+
+$('#btn-again').addEventListener('click', () => { S.endRung = false; S.ref.update({ status: 'lobby', round: null, played: null }); });
+$('#btn-newmusic').addEventListener('click', () => openSetup('edit'));
+$('#btn-leave-end').addEventListener('click', () => leaveRoom());
+$('#dlg-leave').addEventListener('click', () => { $('#dlg').close(); leaveRoom(); });
+$('#dlg-close').addEventListener('click', () => $('#dlg').close());
+$('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) $('#dlg').close(); });
+
+setupAC('artist');
+setupAC('title');
+
+setInterval(() => {
+  if (S.screen === 'game' && S.room) $('#g-time').textContent = timeLabel();
+}, 10000);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && S.code && S.connRef) {
+    db.ref(`rooms/${S.code}/players/${me.pid}/online`).set(true).catch(() => {});
+  }
+});
+
+/* ---------- Start ---------- */
+$('#name').value = me.name;
+const urlCode = new URLSearchParams(location.search).get('room');
+if (urlCode) $('#join-code').value = urlCode.replace(/\D/g, '').slice(0, 4);
+applyLang();
+document.addEventListener('animationend', e => { if (e.target.classList) e.target.classList.remove('ring', 'shake'); });
+
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+})();
+</script>
+</body>
+</html>
