@@ -245,6 +245,7 @@ dialog h2{margin-bottom:16px}
     </div>
     <button class="btn block hidden" id="btn-rejoin" style="margin-top:14px"></button>
   </div>
+  <button class="btn go block hidden" id="btn-install" data-t="installApp" style="margin-bottom:16px"></button>
   <p class="credit" data-t="dzCredit"></p>
 </section>
 
@@ -506,7 +507,8 @@ const STR = {
     gameOver: "Game over", winner: "{name} wins!", tie: "It's a tie: {names}",
     playAgain: "Play again", newMusic: "Change the music", leave: "Leave room",
     settings: "Settings", language: "Language", musicApp: "Open full songs in", close: "Done",
-    soundBtn: "Sound on this phone"
+    soundBtn: "Sound on this phone",
+    installApp: "Install the app on this phone", installed: "Installed! You'll find Rings a Bell on your home screen."
   },
   he: {
     tagline: "מזהים את השיר מתוך שבריר שנייה.",
@@ -562,7 +564,8 @@ const STR = {
     gameOver: "המשחק נגמר", winner: "{name} בראש!", tie: "תיקו: {names}",
     playAgain: "משחק נוסף", newMusic: "החלפת מוזיקה", leave: "יציאה מהחדר",
     settings: "הגדרות", language: "שפה", musicApp: "פתיחת שירים מלאים ב:", close: "סיום",
-    soundBtn: "צליל בטלפון הזה"
+    soundBtn: "צליל בטלפון הזה",
+    installApp: "התקנת האפליקציה בטלפון", installed: "הותקן! Rings a Bell מחכה לך במסך הבית."
   }
 };
 
@@ -1411,6 +1414,27 @@ const urlCode = new URLSearchParams(location.search).get('room');
 if (urlCode) $('#join-code').value = urlCode.replace(/\D/g, '').slice(0, 4);
 applyLang();
 document.addEventListener('animationend', e => { if (e.target.classList) e.target.classList.remove('ring', 'shake'); });
+
+/* ---------- Install button (Android Chrome) ---------- */
+let installEvt = null;
+const isInstalled = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  if (isInstalled()) return;
+  installEvt = e;
+  $('#btn-install').classList.remove('hidden');
+});
+$('#btn-install').addEventListener('click', async () => {
+  if (!installEvt) return;
+  const evt = installEvt; installEvt = null;
+  $('#btn-install').classList.add('hidden');
+  try { await evt.prompt(); await evt.userChoice; } catch (e) {}
+});
+window.addEventListener('appinstalled', () => {
+  installEvt = null;
+  $('#btn-install').classList.add('hidden');
+  toast(t('installed'), true);
+});
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});
