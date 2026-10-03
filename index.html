@@ -337,6 +337,7 @@ dialog h2{margin-bottom:16px}
     <h3><span data-t="players"></span> (<span id="lobby-count">0</span>)</h3>
     <ul class="players" id="lobby-players"></ul>
   </div>
+  <button class="btn block" data-act="addsong" data-t="addSongBtn" style="margin-bottom:16px"></button>
   <div class="card">
     <div class="plsum" id="lobby-sum"></div>
     <button class="link hidden" id="lobby-change" data-t="changeSettings" style="margin-top:6px"></button>
@@ -403,6 +404,7 @@ dialog h2{margin-bottom:16px}
     <h3 data-t="scores"></h3>
     <ol class="board" id="g-board"></ol>
   </div>
+  <button class="btn block" data-act="addsong" data-t="addSongBtn" style="margin-bottom:16px"></button>
   <div class="center hidden" id="g-endwrap"><button class="link" id="g-end" data-t="endGame"></button></div>
   <div class="hostbar hidden" id="g-bar">
     <div class="hostcap" data-t="hostControls"></div>
@@ -443,6 +445,8 @@ dialog h2{margin-bottom:16px}
       <input id="lib-new" type="text" maxlength="40" autocomplete="off" data-tp="newListPh">
       <button class="btn primary" id="lib-create" data-t="create"></button>
     </div>
+    <label class="btn block" for="lib-file" style="margin-top:12px"><span data-t="newFromFile"></span></label>
+    <input type="file" id="lib-file" accept=".csv,.txt,text/csv,text/plain" hidden>
   </div>
   <ul class="results" id="lib-list"></ul>
   <p class="hint" id="lib-msg"></p>
@@ -530,6 +534,18 @@ dialog h2{margin-bottom:16px}
     <button class="btn block hidden" id="dlg-leave" data-t="leave"></button>
     <button class="btn primary block" id="dlg-close" data-t="close"></button>
   </div>
+</dialog>
+
+<dialog id="dlg-add">
+  <h2 data-t="addSongTitle"></h2>
+  <p class="sub" id="add-sub"></p>
+  <div class="row">
+    <input id="add-q" type="text" autocomplete="off" enterkeyhint="search" data-tp="addSongPh">
+    <button class="btn" id="add-search" data-t="search"></button>
+  </div>
+  <ul class="songlist" id="add-results" style="margin-top:10px;max-height:46vh"></ul>
+  <p class="msg" id="add-msg"></p>
+  <button class="btn primary block" id="add-close" data-t="close" style="margin-top:12px"></button>
 </dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -642,7 +658,14 @@ const STR = {
     publicTitle: "Public playlists on Deezer", publicHelp: "No account needed. Search by singer, decade or style.",
     haveLink: "Have a link to a Deezer playlist?", chosen: "Chosen music",
     seeSongs: "See the songs", hideSongs: "Hide the songs",
-    loadingList: "Loading the list…", listEmptyPick: "This list has no songs yet.", emptyLibPick: "No family lists yet."
+    loadingList: "Loading the list…", listEmptyPick: "This list has no songs yet.", emptyLibPick: "No family lists yet.",
+    newFromFile: "New list from a file",
+    addSongBtn: "+ Add a song to the game", addSongTitle: "Add a song",
+    addSongPh: "Song, artist or a Deezer link",
+    addSubLib: "Songs you add join this game and are saved to the list \"{name}\".",
+    addSubGame: "Songs you add join this game.",
+    songAdded: "Song added to the game!", alreadyInGame: "That song is already in the game.",
+    shortTrackLink: "Short share links can't be read here. Search by name instead."
   },
   he: {
     tagline: "מזהים את השיר מתוך שבריר שנייה.",
@@ -722,7 +745,14 @@ const STR = {
     publicTitle: "פלייליסטים ציבוריים בדיזר", publicHelp: "לא צריך חשבון. אפשר לחפש לפי זמר, עשור או סגנון.",
     haveLink: "יש לך קישור לפלייליסט בדיזר?", chosen: "המוזיקה שנבחרה",
     seeSongs: "הצצה בשירים", hideSongs: "הסתרת השירים",
-    loadingList: "טוען את הרשימה…", listEmptyPick: "אין עדיין שירים ברשימה הזו.", emptyLibPick: "עדיין אין רשימות משפחתיות."
+    loadingList: "טוען את הרשימה…", listEmptyPick: "אין עדיין שירים ברשימה הזו.", emptyLibPick: "עדיין אין רשימות משפחתיות.",
+    newFromFile: "רשימה חדשה מקובץ",
+    addSongBtn: "+ הוספת שיר למשחק", addSongTitle: "הוספת שיר",
+    addSongPh: "שיר, מבצע או קישור לדיזר",
+    addSubLib: "שירים שתוסיפו ייכנסו למשחק הזה וגם יישמרו ברשימה \"{name}\".",
+    addSubGame: "שירים שתוסיפו ייכנסו למשחק הזה.",
+    songAdded: "השיר נוסף למשחק!", alreadyInGame: "השיר הזה כבר נמצא במשחק.",
+    shortTrackLink: "אי אפשר לקרוא כאן קישורי שיתוף מקוצרים. אפשר לחפש לפי שם."
   }
 };
 
@@ -1807,6 +1837,94 @@ async function edPlaylistPreview(id, hint) {
   } catch (e) { box.classList.add('hidden'); edMsg('#ed-p-msg', t('plError'), true); }
 }
 
+/* ---------- Any player can add songs to the running game ---------- */
+S.addRes = [];
+const asArray = v => !v ? [] : (Array.isArray(v) ? v.slice() : Object.keys(v).sort((a, b) => a - b).map(k => v[k]));
+const sameTrack = (x, k) => y => y && (String(y.id) === String(x.id) || trackKey(y) === k);
+
+function openAddSong() {
+  if (!S.room) return;
+  S.addRes = [];
+  $('#add-q').value = ''; $('#add-results').innerHTML = ''; edMsg('#add-msg', '');
+  const st = S.room.settings || {};
+  $('#add-sub').textContent = String(st.plId || '').startsWith('lib:') ? t('addSubLib', { name: st.plTitle }) : t('addSubGame');
+  $('#dlg-add').showModal();
+  setTimeout(() => $('#add-q').focus(), 60);
+}
+
+async function addSearch() {
+  const q = $('#add-q').value.trim(); if (!q) return;
+  edMsg('#add-msg', '');
+  try {
+    let list = [];
+    const m = q.match(/deezer\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?track\/(\d+)/i);
+    if (m) {
+      const d = await dz('track/' + m[1]);
+      list = playable(d) ? [mkTrack(d)] : [];
+    } else if (/link\.deezer\.com|deezer\.page\.link/i.test(q)) {
+      edMsg('#add-msg', t('shortTrackLink'), true); return;
+    } else {
+      const r = await dz('search', { q, limit: 20 });
+      list = (r.data || []).filter(playable).map(mkTrack);
+    }
+    S.addRes = list;
+    renderAddRes();
+    if (!list.length) edMsg('#add-msg', t('noSongs'));
+  } catch (e) { edMsg('#add-msg', t('netErr'), true); }
+}
+
+function inRoom(x) {
+  return ((S.room && S.room.tracks) ? asArray(S.room.tracks) : []).some(sameTrack(x, trackKey(x)));
+}
+function renderAddRes() {
+  $('#add-results').innerHTML = S.addRes.map((x, i) => {
+    const has = inRoom(x);
+    return `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(x.a)}</span></span>
+      <button type="button" class="mini ${has ? 'on' : ''}" data-addroom="${i}" ${has ? 'disabled' : ''}>${esc(has ? t('added') : t('add'))}</button></li>`;
+  }).join('');
+}
+
+async function addToRoom(x, btn) {
+  if (!S.ref || !x) return;
+  if (btn) btn.disabled = true;
+  const k = trackKey(x);
+  const item = { id: x.id, t: x.t, a: x.a };
+  try {
+    const res = await S.ref.child('tracks').transaction(cur => {
+      if (!cur) return;
+      const arr = asArray(cur);
+      if (arr.some(sameTrack(x, k))) return;
+      arr.push(item); return arr;
+    });
+    if (!res.committed) { edMsg('#add-msg', t('alreadyInGame')); renderAddRes(); return; }
+    await S.ref.child('settings/ver').set(Date.now());
+    const st = S.room.settings || {};
+    const lid = String(st.plId || '').startsWith('lib:') ? st.plId.slice(4) : null;
+    if (lid && S.lists[lid]) {
+      const r2 = await db.ref('listTracks/' + lid).transaction(cur => {
+        const arr = asArray(cur);
+        if (arr.some(sameTrack(x, k))) return;
+        arr.push(item); return arr;
+      });
+      if (r2.committed) await db.ref('lists/' + lid).update({ count: asArray(r2.snapshot.val()).length, updatedAt: SV });
+    }
+    if ($('#dlg-add').open) edMsg('#add-msg', t('songAdded')); else toast(t('songAdded'), true);
+    renderAddRes();
+  } catch (e) { toast(t('netErr')); if (btn) btn.disabled = false; }
+}
+
+async function newListFromFile(file) {
+  const txt = await new Promise((res, rej) => { const rd = new FileReader(); rd.onload = () => res(String(rd.result || '')); rd.onerror = rej; rd.readAsText(file); });
+  const name = (file.name.replace(/\.[^.]+$/, '').trim() || 'Songs').slice(0, 40);
+  try {
+    const ref = db.ref('lists').push();
+    await ref.set({ name, count: 0, createdAt: SV, updatedAt: SV });
+    await openEditor(ref.key, name);
+    $('#ed-paste').value = txt;
+    runImport(txt);
+  } catch (e) { toast(t('permErr')); }
+}
+
 async function uniqueCode() {
   for (let i = 0; i < 40; i++) {
     const c = String(1000 + Math.floor(Math.random() * 9000));
@@ -1848,6 +1966,7 @@ document.addEventListener('click', e => {
   if (actEl) {
     const act = actEl.dataset.act;
     if (act === 'settings') $('#dlg').showModal();
+    if (act === 'addsong') openAddSong();
     if (act === 'sound') {
       prefs.sound = !prefs.sound; LS.set('sound', prefs.sound);
       renderSoundBtns();
@@ -1860,6 +1979,8 @@ document.addEventListener('click', e => {
   if (hostEl) hostAction(hostEl.dataset.host, hostEl);
   const gEl = e.target.closest('[data-guess]');
   if (gEl) submitGuess(gEl.dataset.guess);
+  const addRoomEl = e.target.closest('[data-addroom]');
+  if (addRoomEl) addToRoom(S.addRes[+addRoomEl.dataset.addroom], addRoomEl);
   const libPick = e.target.closest('[data-libpick]');
   if (libPick) pickFamilyList(libPick.dataset.libpick);
   const openL = e.target.closest('[data-openlist]');
@@ -1991,6 +2112,15 @@ $('#ed-delete').addEventListener('click', async () => {
   } catch (e) { toast(t('netErr')); }
 });
 $('#pl-peek-btn').addEventListener('click', togglePeek);
+$('#lib-file').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (f) newListFromFile(f);
+});
+$('#add-search').addEventListener('click', addSearch);
+$('#add-q').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addSearch(); } });
+$('#add-close').addEventListener('click', () => $('#dlg-add').close());
+$('#dlg-add').addEventListener('click', e => { if (e.target === $('#dlg-add')) $('#dlg-add').close(); });
 
 setupAC('artist');
 setupAC('title');
