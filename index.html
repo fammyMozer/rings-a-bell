@@ -513,6 +513,7 @@ dialog h2{margin-bottom:16px}
     <ul class="songlist" id="ed-songs"></ul>
     <p class="hint hidden" id="ed-empty" data-t="emptyList" style="margin-top:10px"></p>
   </div>
+  <button class="btn primary block" id="ed-play" data-t="playThisList" style="margin-bottom:12px"></button>
   <div class="center"><button class="link danger" id="ed-delete" data-t="deleteList"></button></div>
 </section>
 
@@ -664,7 +665,7 @@ const STR = {
     haveLink: "Have a link to a Deezer playlist?", chosen: "Chosen music",
     seeSongs: "See the songs", hideSongs: "Hide the songs",
     loadingList: "Loading the list…", listEmptyPick: "This list has no songs yet.", emptyLibPick: "No family lists yet.",
-    newFromFile: "New list from a file",
+    newFromFile: "New list from a file", playThisList: "Play with this list",
     addSongBtn: "+ Add a song to the game", addSongTitle: "Add a song",
     addSongPh: "Song, artist or a Deezer link",
     addSubLib: "Songs you add join this game and are saved to the list \"{name}\".",
@@ -752,7 +753,7 @@ const STR = {
     haveLink: "יש לך קישור לפלייליסט בדיזר?", chosen: "המוזיקה שנבחרה",
     seeSongs: "הצצה בשירים", hideSongs: "הסתרת השירים",
     loadingList: "טוען את הרשימה…", listEmptyPick: "אין עדיין שירים ברשימה הזו.", emptyLibPick: "עדיין אין רשימות משפחתיות.",
-    newFromFile: "רשימה חדשה מקובץ",
+    newFromFile: "רשימה חדשה מקובץ", playThisList: "משחק עם הרשימה הזו",
     addSongBtn: "+ הוספת שיר למשחק", addSongTitle: "הוספת שיר",
     addSongPh: "שיר, מבצע או קישור לדיזר",
     addSubLib: "שירים שתוסיפו ייכנסו למשחק הזה וגם יישמרו ברשימה \"{name}\".",
@@ -2152,6 +2153,23 @@ $('#ed-delete').addEventListener('click', async () => {
   } catch (e) { toast(t('netErr')); }
 });
 $('#pl-peek-btn').addEventListener('click', togglePeek);
+$('#ed-play').addEventListener('click', () => {
+  const ed = S.ed; if (!ed) return;
+  if (!ed.tracks.length) { toast(t('listEmptyPick')); return; }
+  const chosen = { id: 'lib:' + ed.id, title: ed.name, pic: '', tracks: ed.tracks.slice() };
+  const intoRoom = S.libReturn === 'setup' && S.setupMode === 'edit' && S.room;
+  if (!intoRoom) {
+    const n = (me.name || $('#name').value || '').trim();
+    if (!n) { show('home'); toast(t('needName')); $('#name').focus(); return; }
+    me.name = n.slice(0, 20); LS.set('name', me.name); $('#name').value = me.name;
+    openSetup('create');
+  } else {
+    show('setup');
+  }
+  S.libReturn = 'setup';
+  S.pl = chosen; setMsg(''); renderPicked(); renderSetupLists();
+  setTimeout(() => $('#pl-card').scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+});
 $('#lib-file').addEventListener('change', e => {
   const f = e.target.files && e.target.files[0];
   e.target.value = '';
