@@ -172,6 +172,25 @@ input:disabled{background:var(--soft);opacity:.7}
 .board.big li:first-child .sc{color:var(--hot)}
 .winner{font-family:var(--display);font-size:30px;margin:8px 0 0}
 
+/* lists & library */
+.sub{color:var(--muted);font-weight:500;margin:0 0 12px}
+textarea{width:100%;font:500 16px var(--body);padding:12px 14px;border:2.5px solid var(--ink);border-radius:14px;background:var(--panel);color:var(--ink);resize:vertical;min-height:110px}
+textarea::placeholder{color:var(--muted);opacity:.85}
+.more summary{cursor:pointer;font-weight:600;padding:8px 0}
+.songlist{list-style:none;margin:0;padding:0;max-height:420px;overflow:auto}
+.songlist li{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:2px dashed var(--soft)}
+.songlist li:last-child{border-bottom:0}
+.songlist .si{flex:1;min-width:0}
+.songlist .st{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.songlist .sa{display:block;font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini{flex:none;min-width:44px;height:40px;border:2px solid var(--ink);border-radius:999px;background:var(--panel);color:var(--ink);font:600 15px var(--body);padding:0 12px;cursor:pointer}
+.mini.on{background:var(--go);color:var(--on-go)}
+.chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:2px solid var(--ink);border-radius:999px;background:var(--soft);color:var(--ink);font:500 14px var(--body);padding:6px 12px;cursor:pointer;text-align:start}
+.chips button.done{text-decoration:line-through;opacity:.5}
+.ricon{width:44px;height:44px;border-radius:10px;background:var(--soft);display:grid;place-items:center;flex:none;font-size:22px}
+.danger{color:var(--hot)}
+
 /* host bar */
 .hostbar{position:fixed;inset-inline:0;bottom:0;z-index:30;background:var(--ink);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
 .hostbar .inner{max-width:520px;margin:0 auto;display:flex;gap:10px}
@@ -245,6 +264,7 @@ dialog h2{margin-bottom:16px}
     </div>
     <button class="btn block hidden" id="btn-rejoin" style="margin-top:14px"></button>
   </div>
+  <button class="btn block" id="btn-lib" data-t="familyLists" style="margin-bottom:16px"></button>
   <button class="btn go block hidden" id="btn-install" data-t="installApp" style="margin-bottom:16px"></button>
   <p class="credit" data-t="dzCredit"></p>
 </section>
@@ -257,26 +277,36 @@ dialog h2{margin-bottom:16px}
     <span style="width:46px"></span>
   </div>
   <div class="card">
-    <div class="field">
-      <label class="lab" for="pl-link" data-t="playlistLabel"></label>
-      <div class="row">
+    <h3 data-t="familyLists"></h3>
+    <ul class="results" id="lib-pick"></ul>
+    <p class="msg" id="lib-pick-msg"></p>
+    <button class="link" id="setup-manage" data-t="manageLists"></button>
+  </div>
+  <div class="card">
+    <h3 data-t="publicTitle"></h3>
+    <p class="sub" data-t="publicHelp"></p>
+    <div class="row" style="margin-bottom:10px">
+      <input id="pl-q" type="text" autocomplete="off" enterkeyhint="search" data-tp="searchPh">
+      <button class="btn" id="pl-search" data-t="search"></button>
+    </div>
+    <ul class="results" id="pl-results"></ul>
+    <p class="msg" id="pl-msg" role="status"></p>
+    <details class="more">
+      <summary data-t="haveLink"></summary>
+      <div class="row" style="margin-top:10px">
         <input id="pl-link" type="url" inputmode="url" autocomplete="off" data-tp="playlistPh">
         <button class="btn" id="pl-load" data-t="load"></button>
       </div>
-    </div>
-    <div class="field" style="margin-bottom:10px">
-      <label class="lab" for="pl-q" data-t="orSearch"></label>
-      <div class="row">
-        <input id="pl-q" type="text" autocomplete="off" enterkeyhint="search" data-tp="searchPh">
-        <button class="btn" id="pl-search" data-t="search"></button>
-      </div>
-    </div>
-    <ul class="results" id="pl-results"></ul>
-    <div class="picked hidden" id="pl-pick">
+    </details>
+  </div>
+  <div class="card hidden" id="pl-card">
+    <h3 data-t="chosen"></h3>
+    <div class="picked" id="pl-pick">
       <img id="pl-pic" alt="">
       <div><div class="t" id="pl-title"></div><div id="pl-status"></div></div>
     </div>
-    <p class="msg" id="pl-msg" role="status"></p>
+    <button class="link hidden" id="pl-peek-btn"></button>
+    <ul class="songlist hidden" id="pl-peek"></ul>
   </div>
   <div class="card">
     <h3 data-t="endTitle"></h3>
@@ -400,6 +430,87 @@ dialog h2{margin-bottom:16px}
   </div></div>
 </section>
 
+<!-- FAMILY LISTS -->
+<section class="screen" id="s-lib">
+  <div class="top">
+    <button class="link" id="lib-back" data-t="back"></button>
+    <h2 data-t="libTitle"></h2>
+    <span style="width:46px"></span>
+  </div>
+  <p class="sub center" data-t="libIntro"></p>
+  <div class="card">
+    <div class="row">
+      <input id="lib-new" type="text" maxlength="40" autocomplete="off" data-tp="newListPh">
+      <button class="btn primary" id="lib-create" data-t="create"></button>
+    </div>
+  </div>
+  <ul class="results" id="lib-list"></ul>
+  <p class="hint" id="lib-msg"></p>
+</section>
+
+<!-- LIST EDITOR -->
+<section class="screen" id="s-edit">
+  <div class="top">
+    <button class="link" id="ed-back" data-t="back"></button>
+    <h2 data-t="editTitle"></h2>
+    <span style="width:46px"></span>
+  </div>
+  <div class="card">
+    <div class="field" style="margin-bottom:0">
+      <label class="lab" for="ed-name" data-t="listName"></label>
+      <input id="ed-name" type="text" maxlength="40" autocomplete="off">
+    </div>
+  </div>
+  <div class="card">
+    <h3 data-t="addSongs"></h3>
+    <div class="seg" id="ed-tabs" style="margin-bottom:14px">
+      <button type="button" data-tab="spotify" data-t="tabSpotify"></button>
+      <button type="button" data-tab="search" data-t="tabSearch"></button>
+      <button type="button" data-tab="deezer" data-t="tabDeezer"></button>
+    </div>
+    <div data-panel="spotify">
+      <p class="sub" data-t="spotifyHelp"></p>
+      <label class="btn block" for="ed-file" style="margin-bottom:12px"><span data-t="chooseFile"></span></label>
+      <input type="file" id="ed-file" accept=".csv,.txt,text/csv,text/plain" hidden>
+      <textarea id="ed-paste" rows="5" data-tp="pastePh"></textarea>
+      <button class="btn primary block" id="ed-import" data-t="findSongs" style="margin-top:12px"></button>
+      <p class="msg" id="ed-imp-msg" role="status"></p>
+      <div class="hidden" id="ed-missing">
+        <p class="sub" id="ed-missing-cap"></p>
+        <ul class="chips" id="ed-missing-list"></ul>
+      </div>
+    </div>
+    <div data-panel="search" hidden>
+      <div class="row">
+        <input id="ed-q" type="text" autocomplete="off" enterkeyhint="search" data-tp="searchSongsPh">
+        <button class="btn" id="ed-search" data-t="search"></button>
+      </div>
+      <ul class="songlist" id="ed-results" style="margin-top:10px"></ul>
+      <p class="msg" id="ed-s-msg"></p>
+    </div>
+    <div data-panel="deezer" hidden>
+      <div class="row">
+        <input id="ed-pq" type="text" autocomplete="off" enterkeyhint="search" data-tp="searchPh">
+        <button class="btn" id="ed-psearch" data-t="search"></button>
+      </div>
+      <ul class="results" id="ed-presults" style="margin-top:10px"></ul>
+      <div class="hidden" id="ed-ppreview">
+        <div class="picked"><img id="ed-ppic" alt=""><div><div class="t" id="ed-ptitle"></div><div id="ed-pstatus"></div></div></div>
+        <ul class="songlist" id="ed-plist" style="margin-top:10px;max-height:260px"></ul>
+        <button class="btn primary block hidden" id="ed-addall" style="margin-top:12px"></button>
+      </div>
+      <p class="msg" id="ed-p-msg"></p>
+    </div>
+  </div>
+  <div class="card">
+    <h3 id="ed-count"></h3>
+    <input id="ed-filter" type="text" autocomplete="off" data-tp="filterPh" style="margin-bottom:10px">
+    <ul class="songlist" id="ed-songs"></ul>
+    <p class="hint hidden" id="ed-empty" data-t="emptyList" style="margin-top:10px"></p>
+  </div>
+  <div class="center"><button class="link danger" id="ed-delete" data-t="deleteList"></button></div>
+</section>
+
 </div>
 
 <dialog id="dlg">
@@ -508,7 +619,30 @@ const STR = {
     playAgain: "Play again", newMusic: "Change the music", leave: "Leave room",
     settings: "Settings", language: "Language", musicApp: "Open full songs in", close: "Done",
     soundBtn: "Sound on this phone",
-    installApp: "Install the app on this phone", installed: "Installed! You'll find Rings a Bell on your home screen."
+    installApp: "Install the app on this phone", installed: "Installed! You'll find Rings a Bell on your home screen.",
+    familyLists: "Family song lists", manageLists: "Create or edit family lists",
+    libTitle: "Family lists", libIntro: "Lists saved here are shared with everyone who plays.",
+    newListPh: "Name for a new list", create: "Create",
+    noLists: "No lists yet. Create the first one above.", needListName: "Give the list a name first.",
+    updatedOn: "updated {d}",
+    permErr: "Couldn't open the family lists. Check the Firebase rules.",
+    editTitle: "Edit list", listName: "List name", addSongs: "Add songs",
+    tabSpotify: "From Spotify", tabSearch: "Search", tabDeezer: "Deezer playlist",
+    spotifyHelp: "Export your Spotify playlist to a file with TuneMyMusic, then choose the file here. You can also paste a list, one song per line.",
+    chooseFile: "Choose a file", pastePh: "Or paste here, for example:\nArik Einstein - Ani Ve'Ata",
+    findSongs: "Find the songs", finding: "Finding songs… {n} of {total}",
+    importDone: "Added: {found}. Already in the list: {dup}.",
+    notFoundTitle: "Not found ({n}). Tap one to search for it yourself:",
+    nothingToImport: "No songs found in this text.",
+    searchSongsPh: "Song or artist name", noSongs: "No songs found. Try other words.",
+    add: "Add", added: "Added", addAll: "Add all {n} songs",
+    songsInList: "Songs in the list ({n})", filterPh: "Filter the list", remove: "Remove",
+    deleteList: "Delete this list", confirmDelete: "Delete the list \"{name}\"? This can't be undone.",
+    emptyList: "This list is empty. Add songs above.",
+    publicTitle: "Public playlists on Deezer", publicHelp: "No account needed. Search by singer, decade or style.",
+    haveLink: "Have a link to a Deezer playlist?", chosen: "Chosen music",
+    seeSongs: "See the songs", hideSongs: "Hide the songs",
+    loadingList: "Loading the list…", listEmptyPick: "This list has no songs yet.", emptyLibPick: "No family lists yet."
   },
   he: {
     tagline: "מזהים את השיר מתוך שבריר שנייה.",
@@ -565,7 +699,30 @@ const STR = {
     playAgain: "משחק נוסף", newMusic: "החלפת מוזיקה", leave: "יציאה מהחדר",
     settings: "הגדרות", language: "שפה", musicApp: "פתיחת שירים מלאים ב:", close: "סיום",
     soundBtn: "צליל בטלפון הזה",
-    installApp: "התקנת האפליקציה בטלפון", installed: "הותקן! Rings a Bell מחכה לך במסך הבית."
+    installApp: "התקנת האפליקציה בטלפון", installed: "הותקן! Rings a Bell מחכה לך במסך הבית.",
+    familyLists: "רשימות השירים המשפחתיות", manageLists: "יצירה ועריכה של רשימות משפחתיות",
+    libTitle: "רשימות משפחתיות", libIntro: "הרשימות כאן משותפות לכל מי שמשחק.",
+    newListPh: "שם לרשימה חדשה", create: "יצירה",
+    noLists: "עדיין אין רשימות. אפשר ליצור את הראשונה למעלה.", needListName: "צריך לתת שם לרשימה קודם.",
+    updatedOn: "עודכנה ב-{d}",
+    permErr: "לא הצלחנו לפתוח את הרשימות המשפחתיות. כדאי לבדוק את כללי האבטחה ב-Firebase.",
+    editTitle: "עריכת רשימה", listName: "שם הרשימה", addSongs: "הוספת שירים",
+    tabSpotify: "מספוטיפיי", tabSearch: "חיפוש", tabDeezer: "פלייליסט מדיזר",
+    spotifyHelp: "מייצאים את הפלייליסט מספוטיפיי לקובץ דרך TuneMyMusic, ובוחרים כאן את הקובץ. אפשר גם להדביק רשימה, שיר אחד בכל שורה.",
+    chooseFile: "בחירת קובץ", pastePh: "או להדביק כאן, למשל:\nאריק איינשטיין - אני ואתה",
+    findSongs: "חיפוש השירים", finding: "מחפש שירים… {n} מתוך {total}",
+    importDone: "נוספו: {found}. כבר היו ברשימה: {dup}.",
+    notFoundTitle: "לא נמצאו ({n}). אפשר להקיש על שיר כדי לחפש אותו ידנית:",
+    nothingToImport: "לא נמצאו שירים בטקסט הזה.",
+    searchSongsPh: "שם שיר או מבצע", noSongs: "לא נמצאו שירים. כדאי לנסות מילים אחרות.",
+    add: "הוספה", added: "נוסף", addAll: "הוספת כל {n} השירים",
+    songsInList: "השירים ברשימה ({n})", filterPh: "סינון הרשימה", remove: "הסרה",
+    deleteList: "מחיקת הרשימה", confirmDelete: "למחוק את הרשימה \"{name}\"? אי אפשר לבטל את זה.",
+    emptyList: "הרשימה ריקה. אפשר להוסיף שירים למעלה.",
+    publicTitle: "פלייליסטים ציבוריים בדיזר", publicHelp: "לא צריך חשבון. אפשר לחפש לפי זמר, עשור או סגנון.",
+    haveLink: "יש לך קישור לפלייליסט בדיזר?", chosen: "המוזיקה שנבחרה",
+    seeSongs: "הצצה בשירים", hideSongs: "הסתרת השירים",
+    loadingList: "טוען את הרשימה…", listEmptyPick: "אין עדיין שירים ברשימה הזו.", emptyLibPick: "עדיין אין רשימות משפחתיות."
   }
 };
 
@@ -622,7 +779,14 @@ function ring(el) {
 
 /* ---------- Deezer (JSONP, no key needed) ---------- */
 let jsonpN = 0;
-function dz(path, params) {
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function dz(path, params) {
+  for (let k = 0; ; k++) {
+    try { return await dzOnce(path, params); }
+    catch (e) { if (e.code !== 4 || k >= 4) throw e; await sleep(1200 * (k + 1)); }
+  }
+}
+function dzOnce(path, params) {
   return new Promise((resolve, reject) => {
     const cb = '__dz' + (++jsonpN) + '_' + Date.now();
     const q = new URLSearchParams(Object.assign({}, params || {}, { output: 'jsonp', callback: cb }));
@@ -631,7 +795,11 @@ function dz(path, params) {
     function done() { clearTimeout(timer); delete window[cb]; s.remove(); }
     window[cb] = data => {
       done();
-      if (!data || data.error) reject(new Error((data && data.error && data.error.message) || 'deezer'));
+      if (!data || data.error) {
+        const err = new Error((data && data.error && data.error.message) || 'deezer');
+        err.code = data && data.error && data.error.code;
+        reject(err);
+      }
       else resolve(data);
     };
     s.onerror = () => { done(); reject(new Error('network')); };
@@ -743,6 +911,9 @@ function applyLang() {
   renderSoundBtns();
   renderSetupSave();
   refreshRejoin();
+  renderLibrary(); renderSetupLists();
+  if (S.ed) { renderEditorSongs(); if (S.edRes.length) renderEdResults(); }
+  if (S.pl && !$('#pl-card').classList.contains('hidden')) renderPicked();
   if (S.room) renderCurrent();
 }
 
@@ -1180,7 +1351,7 @@ function openSetup(mode) {
   S.setupMode = mode;
   S.editing = mode === 'edit';
   $('#pl-results').innerHTML = '';
-  $('#pl-msg').textContent = ''; $('#pl-msg').classList.remove('err');
+  setMsg('');
   $('#pl-link').value = ''; $('#pl-q').value = '';
   if (mode === 'edit' && S.room) {
     const st = S.room.settings || {};
@@ -1193,6 +1364,7 @@ function openSetup(mode) {
     S.pl = null;
   }
   renderPicked();
+  renderSetupLists();
   renderSetupSave();
   show('setup');
 }
@@ -1201,15 +1373,36 @@ function renderSetupSave() {
   $('#setup-save').textContent = S.setupMode === 'edit' ? t('saveChanges') : t('openRoom');
 }
 
+function songRows(tracks) {
+  return tracks.map(x => `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(x.a)}</span></span></li>`).join('');
+}
+
 function renderPicked(statusText) {
-  const box = $('#pl-pick');
-  if (!S.pl && !statusText) { box.classList.add('hidden'); return; }
-  box.classList.remove('hidden');
+  const card = $('#pl-card');
+  $('#pl-peek').classList.add('hidden'); $('#pl-peek').innerHTML = '';
+  if (!S.pl && !statusText) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
   const pic = S.pl ? S.pl.pic : (S.plPending && S.plPending.pic);
   const img = $('#pl-pic');
   if (pic) { img.src = pic; img.classList.remove('hidden'); } else img.classList.add('hidden');
   $('#pl-title').textContent = S.pl ? S.pl.title : (S.plPending ? S.plPending.title : '');
   $('#pl-status').textContent = statusText || (S.pl ? t('plReady', { n: S.pl.tracks.length }) : '');
+  const pb = $('#pl-peek-btn');
+  pb.classList.toggle('hidden', !S.pl);
+  pb.textContent = t('seeSongs');
+}
+
+function togglePeek() {
+  const ul = $('#pl-peek');
+  if (!S.pl) return;
+  if (ul.classList.contains('hidden')) {
+    ul.innerHTML = songRows(S.pl.tracks);
+    ul.classList.remove('hidden');
+    $('#pl-peek-btn').textContent = t('hideSongs');
+  } else {
+    ul.classList.add('hidden'); ul.innerHTML = '';
+    $('#pl-peek-btn').textContent = t('seeSongs');
+  }
 }
 
 function setMsg(text, err) {
@@ -1226,6 +1419,24 @@ function parsePlaylist(s) {
   return m ? { id: m[1] } : null;
 }
 
+const mkTrack = x => ({ id: x.id, t: x.title_short || x.title, a: x.artist.name });
+const playable = x => x && x.id && x.readable !== false && x.preview && x.artist;
+
+async function fetchPlaylistTracks(id, onProgress) {
+  const info = await dz('playlist/' + id);
+  const total = Math.min(info.nb_tracks || 0, MAX_TRACKS);
+  const seen = new Set(), tracks = [];
+  for (let index = 0; index < total; index += 100) {
+    const page = await dz(`playlist/${id}/tracks`, { index, limit: 100 });
+    (page.data || []).forEach(x => {
+      if (playable(x) && !seen.has(x.id)) { seen.add(x.id); tracks.push(mkTrack(x)); }
+    });
+    if (onProgress) onProgress(tracks.length, info);
+    if (!page.next) break;
+  }
+  return { info, tracks };
+}
+
 async function loadPlaylist(id, hint) {
   if (S.plLoading) return;
   S.plLoading = true;
@@ -1233,29 +1444,25 @@ async function loadPlaylist(id, hint) {
   setMsg('');
   renderPicked(t('loadingPl', { n: '' }));
   try {
-    const info = await dz('playlist/' + id);
-    S.plPending = { title: info.title, pic: info.picture_medium || '' };
-    const total = Math.min(info.nb_tracks || 0, MAX_TRACKS);
-    const seen = new Set(), tracks = [];
-    for (let index = 0; index < total; index += 100) {
-      const page = await dz(`playlist/${id}/tracks`, { index, limit: 100 });
-      (page.data || []).forEach(x => {
-        if (x && x.readable !== false && x.preview && x.artist && !seen.has(x.id)) {
-          seen.add(x.id);
-          tracks.push({ id: x.id, t: x.title_short || x.title, a: x.artist.name });
-        }
-      });
-      renderPicked(t('loadingPl', { n: tracks.length }));
-      if (!page.next) break;
-    }
-    if (!tracks.length) { S.pl = null; renderPicked(' '); setMsg(t('plEmpty'), true); }
+    const { info, tracks } = await fetchPlaylistTracks(id, (n, info) => {
+      S.plPending = { title: info.title, pic: info.picture_medium || '' };
+      renderPicked(t('loadingPl', { n }));
+    });
+    if (!tracks.length) { S.pl = null; S.plPending = { title: info.title, pic: info.picture_medium || '' }; renderPicked(' '); setMsg(t('plEmpty'), true); }
     else { S.pl = { id: String(id), title: info.title, pic: info.picture_medium || '', tracks }; renderPicked(); }
+    $('#pl-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
   } catch (e) {
     S.pl = null; S.plPending = null; renderPicked();
     setMsg(e.message === 'network' || e.message === 'timeout' ? t('netErr') : t('plError'), true);
   } finally {
     S.plLoading = false;
   }
+}
+
+function playlistResults(items, attr) {
+  return items.map(p => `<li><button type="button" ${attr}="${p.id}" data-title="${esc(p.title)}" data-pic="${esc(p.picture_small || '')}">
+      ${p.picture_small ? `<img src="${esc(p.picture_small)}" alt="">` : '<img alt="">'}
+      <span><span class="rt">${esc(p.title)}</span><span class="rs">${esc(t('songsCount', { n: p.nb_tracks || 0 }))}${p.user && p.user.name ? ' / ' + esc(p.user.name) : ''}</span></span></button></li>`).join('');
 }
 
 async function searchPlaylists() {
@@ -1265,11 +1472,339 @@ async function searchPlaylists() {
   try {
     const res = await dz('search/playlist', { q, limit: 15 });
     const items = (res.data || []).filter(p => p && p.id);
-    if (!items.length) { $('#pl-results').innerHTML = ''; setMsg(t('noResults')); return; }
-    $('#pl-results').innerHTML = items.map(p => `<li><button type="button" data-pl="${p.id}" data-title="${esc(p.title)}" data-pic="${esc(p.picture_small || '')}">
-      ${p.picture_small ? `<img src="${esc(p.picture_small)}" alt="">` : '<img alt="">'}
-      <span><span class="rt">${esc(p.title)}</span><span class="rs">${esc(t('songsCount', { n: p.nb_tracks || 0 }))}${p.user && p.user.name ? ' / ' + esc(p.user.name) : ''}</span></span></button></li>`).join('');
+    $('#pl-results').innerHTML = items.length ? playlistResults(items, 'data-pl') : '';
+    if (!items.length) setMsg(t('noResults'));
   } catch (e) { setMsg(t('netErr'), true); }
+}
+
+/* ---------- Family song lists (shared library in Firebase) ---------- */
+S.lists = {}; S.listsErr = false; S.libReturn = 'home'; S.ed = null; S.edRes = []; S.missing = []; S.edPl = null;
+db.ref('lists').on('value', snap => {
+  S.lists = snap.val() || {}; S.listsErr = false;
+  renderLibrary(); renderSetupLists();
+}, () => { S.listsErr = true; renderLibrary(); renderSetupLists(); });
+
+function sortedLists() {
+  return Object.keys(S.lists).map(id => Object.assign({ id }, S.lists[id]))
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+}
+function fmtDate(ts) {
+  if (!ts) return '';
+  try { return new Date(ts).toLocaleDateString(prefs.lang === 'he' ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short' }); }
+  catch (e) { return ''; }
+}
+function listRows(lists, attr) {
+  return lists.map(l => `<li><button type="button" ${attr}="${esc(l.id)}"><span class="ricon" aria-hidden="true">🎵</span>
+    <span><span class="rt">${esc(l.name)}</span><span class="rs">${esc(t('songsCount', { n: l.count || 0 }))} / ${esc(t('updatedOn', { d: fmtDate(l.updatedAt) }))}</span></span></button></li>`).join('');
+}
+function renderLibrary() {
+  const ls = sortedLists();
+  $('#lib-list').innerHTML = listRows(ls, 'data-openlist');
+  $('#lib-msg').textContent = S.listsErr ? t('permErr') : (ls.length ? '' : t('noLists'));
+}
+function renderSetupLists() {
+  const ls = sortedLists();
+  $('#lib-pick').innerHTML = listRows(ls, 'data-libpick');
+  $('#lib-pick-msg').textContent = S.listsErr ? t('permErr') : (ls.length ? '' : t('emptyLibPick'));
+}
+
+function openLibrary(from) {
+  if (from) S.libReturn = from;
+  renderLibrary();
+  show('lib');
+}
+
+async function pickFamilyList(id) {
+  const meta = S.lists[id]; if (!meta) return;
+  S.pl = null; S.plPending = { title: meta.name, pic: '' };
+  setMsg('');
+  renderPicked(t('loadingList'));
+  $('#pl-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  try {
+    const snap = await db.ref('listTracks/' + id).get();
+    const tracks = (snap.val() || []).filter(Boolean);
+    if (!tracks.length) { renderPicked(t('listEmptyPick')); return; }
+    S.pl = { id: 'lib:' + id, title: meta.name, pic: '', tracks };
+    renderPicked();
+  } catch (e) { renderPicked(); toast(t('netErr')); }
+}
+
+async function createList() {
+  const name = $('#lib-new').value.trim().slice(0, 40);
+  if (!name) { toast(t('needListName')); $('#lib-new').focus(); return; }
+  try {
+    const ref = db.ref('lists').push();
+    await ref.set({ name, count: 0, createdAt: SV, updatedAt: SV });
+    $('#lib-new').value = '';
+    openEditor(ref.key, name);
+  } catch (e) { toast(t('permErr')); }
+}
+
+const trackKey = x => norm(x.t) + '|' + norm(x.a);
+function setEdTracks(arr) {
+  const ed = S.ed;
+  ed.tracks = (arr || []).filter(x => x && x.id);
+  ed.ids = new Set(ed.tracks.map(x => x.id));
+  ed.keys = new Set(ed.tracks.map(trackKey));
+  ed.loaded = true;
+  renderEditorSongs();
+}
+
+async function openEditor(id, nameHint) {
+  const meta = S.lists[id] || {};
+  S.ed = { id, name: meta.name || nameHint || '', tracks: [], ids: new Set(), keys: new Set(), loaded: false };
+  S.edRes = []; S.missing = []; S.edPl = null;
+  $('#ed-name').value = S.ed.name;
+  $('#ed-filter').value = ''; $('#ed-paste').value = ''; $('#ed-q').value = ''; $('#ed-pq').value = '';
+  $('#ed-results').innerHTML = ''; $('#ed-presults').innerHTML = '';
+  $('#ed-ppreview').classList.add('hidden'); $('#ed-missing').classList.add('hidden');
+  ['#ed-imp-msg', '#ed-s-msg', '#ed-p-msg'].forEach(sel => { $(sel).textContent = ''; $(sel).classList.remove('err'); });
+  setEdTab('spotify');
+  renderEditorSongs();
+  show('edit');
+  try {
+    const snap = await db.ref('listTracks/' + id).get();
+    if (S.ed && S.ed.id === id) setEdTracks(snap.val() || []);
+  } catch (e) { toast(t('netErr')); }
+}
+
+let edSaveT = null;
+function edSave() {
+  const ed = S.ed; if (!ed) return;
+  clearTimeout(edSaveT);
+  edSaveT = setTimeout(async () => {
+    const up = {};
+    up['listTracks/' + ed.id] = ed.tracks.length ? ed.tracks : null;
+    up['lists/' + ed.id + '/count'] = ed.tracks.length;
+    up['lists/' + ed.id + '/name'] = ed.name;
+    up['lists/' + ed.id + '/updatedAt'] = SV;
+    try { await db.ref().update(up); } catch (e) { toast(t('netErr')); }
+  }, 400);
+}
+
+function edAdd(list) {
+  const ed = S.ed; let added = 0, dup = 0;
+  if (!ed) return { added, dup };
+  list.forEach(x => {
+    const k = trackKey(x);
+    if (ed.ids.has(x.id) || ed.keys.has(k)) { dup++; return; }
+    ed.tracks.push({ id: x.id, t: x.t, a: x.a }); ed.ids.add(x.id); ed.keys.add(k); added++;
+  });
+  if (added) { edSave(); renderEditorSongs(); }
+  return { added, dup };
+}
+function edRemove(id) {
+  const ed = S.ed; if (!ed) return;
+  setEdTracks(ed.tracks.filter(x => String(x.id) !== String(id)));
+  edSave();
+  if (S.edRes.length) renderEdResults();
+}
+
+function renderEditorSongs() {
+  const ed = S.ed; if (!ed) return;
+  $('#ed-count').textContent = t('songsInList', { n: ed.tracks.length });
+  const q = norm($('#ed-filter').value);
+  const shown = q ? ed.tracks.filter(x => norm(x.t + ' ' + x.a).includes(q)) : ed.tracks;
+  $('#ed-songs').innerHTML = shown.slice().reverse().map(x => `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(x.a)}</span></span>
+    <button type="button" class="mini" data-rm="${x.id}" aria-label="${esc(t('remove'))}">✕</button></li>`).join('');
+  $('#ed-empty').classList.toggle('hidden', !(ed.loaded && !ed.tracks.length));
+}
+
+function setEdTab(name) {
+  $$('#ed-tabs [data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === name)));
+  $$('#s-edit [data-panel]').forEach(p => { p.hidden = p.dataset.panel !== name; });
+}
+
+function edMsg(sel, text, err) { const m = $(sel); m.textContent = text || ''; m.classList.toggle('err', !!err); }
+
+/* --- import from a Spotify export (file or pasted text) --- */
+function parseCSV(text, delim) {
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+      else f += c;
+    } else if (c === '"') q = true;
+    else if (c === delim) { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(f); rows.push(row); row = []; f = '';
+    } else f += c;
+  }
+  if (f || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => String(x).trim()));
+}
+
+function parseImport(text) {
+  text = String(text || '').replace(/^\uFEFF/, '');
+  const first = (text.split(/\r?\n/).find(l => l.trim()) || '');
+  const delim = ['\t', ';', ','].map(d => [d, first.split(d).length - 1]).sort((a, b) => b[1] - a[1])[0];
+  const items = [], seen = new Set();
+  const push = it => { const k = norm(it.raw); if (k && !seen.has(k)) { seen.add(k); items.push(it); } };
+  if (delim[1] > 0 && /artist|title|track|song|name/i.test(first)) {
+    const rows = parseCSV(text, delim[0]);
+    const head = rows[0].map(h => String(h).trim().toLowerCase());
+    const find = (re, not) => head.findIndex(h => re.test(h) && !(not && not.test(h)));
+    let ti = find(/^(track ?name|song ?name|title|track|song|name)$/);
+    if (ti < 0) ti = find(/track|title|song/, /artist|album|id|isrc|playlist|uri|url/);
+    const ai = find(/artist/, /album/);
+    const ii = find(/isrc/);
+    rows.slice(1).forEach(r => {
+      const title = ti >= 0 ? String(r[ti] || '').trim() : '';
+      const artist = ai >= 0 ? String(r[ai] || '').trim() : '';
+      const isrc = ii >= 0 ? String(r[ii] || '').trim() : '';
+      if (title || artist) push({ title, artist, isrc, raw: [artist, title].filter(Boolean).join(' - ') });
+    });
+  } else {
+    text.split(/\r?\n/).forEach(line => {
+      let l = line.trim().replace(/^\d+[\.\)]\s+/, '');
+      if (!l) return;
+      const parts = l.split(/\s+[-\u2013\u2014]\s+|\t/);
+      if (parts.length >= 2) push({ p1: parts[0].trim(), p2: parts.slice(1).join(' - ').trim(), raw: l });
+      else push({ raw: l });
+    });
+  }
+  return items;
+}
+
+const cleanTitle = s => String(s || '')
+  .replace(/\s*[\(\[][^\)\]]*[\)\]]/g, m => /remaster|feat|ft\.|version|mono|stereo|edit|bonus|deluxe|live|mix|from /i.test(m) ? '' : m)
+  .replace(/\s+-\s+.*(remaster|version|edit|mono|stereo|live|mix).*$/i, '').trim();
+const firstArtist = s => String(s || '').split(/\s*(?:,|;|&|\sfeat\.?\s|\sft\.?\s|\sx\s)\s*/i)[0].trim();
+const toks = s => new Set(norm(cleanTitle(s)).split(' ').filter(w => w && !['the', 'a', 'feat', 'ft'].includes(w)));
+function dice(a, b) {
+  if (!a.size || !b.size) return 0;
+  let n = 0; a.forEach(w => { if (b.has(w)) n++; });
+  return 2 * n / (a.size + b.size);
+}
+function scoreCand(c, it) {
+  const ct = toks(c.title_short || c.title), ca = toks(c.artist.name);
+  if (it.title || it.artist) return dice(toks(it.title), ct) * 0.6 + dice(toks(firstArtist(it.artist)), ca) * 0.4;
+  if (it.p1) {
+    const a = dice(toks(it.p1), ca) * 0.4 + dice(toks(it.p2), ct) * 0.6;
+    const b = dice(toks(it.p2), ca) * 0.4 + dice(toks(it.p1), ct) * 0.6;
+    return Math.max(a, b);
+  }
+  const r = toks(it.raw), both = new Set([...ct, ...ca]);
+  return dice(both, r);
+}
+async function searchTracks(q, limit) {
+  try {
+    const r = await dz('search', { q, limit: limit || 10 });
+    return (r.data || []).filter(playable);
+  } catch (e) { if (e.message === 'network' || e.message === 'timeout') throw e; return []; }
+}
+function bestOf(cands, it) {
+  let best = null, bs = 0;
+  cands.forEach(c => { const sc = scoreCand(c, it); if (sc > bs) { bs = sc; best = c; } });
+  return bs >= 0.6 ? mkTrack(best) : null;
+}
+function searchTextFor(it) {
+  if (it.title || it.artist) return (firstArtist(it.artist) + ' ' + cleanTitle(it.title)).trim();
+  return it.raw.replace(/\s+[-\u2013\u2014]\s+|\t/g, ' ');
+}
+async function matchItem(it) {
+  if (it.isrc) {
+    try { const d = await dz('track/isrc:' + encodeURIComponent(it.isrc)); if (playable(d)) return mkTrack(d); } catch (e) {}
+  }
+  if (it.title && it.artist) {
+    const q = `artist:"${firstArtist(it.artist).replace(/"/g, '')}" track:"${cleanTitle(it.title).replace(/"/g, '')}"`;
+    const hit = bestOf(await searchTracks(q, 5), it);
+    if (hit) return hit;
+  }
+  return bestOf(await searchTracks(searchTextFor(it), 10), it);
+}
+async function pool(items, n, fn) {
+  let i = 0;
+  const worker = async () => { while (i < items.length) { const it = items[i++]; await fn(it); } };
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, worker));
+}
+
+async function runImport(text) {
+  if (S.importing || !S.ed) return;
+  const items = parseImport(text);
+  if (!items.length) { edMsg('#ed-imp-msg', t('nothingToImport'), true); return; }
+  S.importing = true;
+  const btn = $('#ed-import'); btn.disabled = true;
+  $('#ed-missing').classList.add('hidden');
+  const found = [], missing = []; let done = 0, netFail = false;
+  edMsg('#ed-imp-msg', t('finding', { n: 0, total: items.length }));
+  await pool(items, 3, async it => {
+    let tr = null;
+    try { tr = await matchItem(it); } catch (e) { netFail = true; }
+    if (tr) found.push(tr); else missing.push(it);
+    done++;
+    edMsg('#ed-imp-msg', t('finding', { n: done, total: items.length }));
+  });
+  const r = edAdd(found);
+  edMsg('#ed-imp-msg', t('importDone', { found: r.added, dup: r.dup }));
+  if (netFail) toast(t('netErr'));
+  renderMissing(missing);
+  if (r.added || r.dup) $('#ed-paste').value = '';
+  S.importing = false; btn.disabled = false;
+}
+
+function renderMissing(list) {
+  S.missing = list;
+  const box = $('#ed-missing');
+  if (!list.length) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  $('#ed-missing-cap').textContent = t('notFoundTitle', { n: list.length });
+  $('#ed-missing-list').innerHTML = list.map((it, i) => `<li><button type="button" data-miss="${i}">${esc(it.raw)}</button></li>`).join('');
+}
+
+/* --- manual song search --- */
+async function edSearch() {
+  const q = $('#ed-q').value.trim(); if (!q) return;
+  edMsg('#ed-s-msg', '');
+  try {
+    const r = await dz('search', { q, limit: 25 });
+    S.edRes = (r.data || []).filter(playable).map(mkTrack);
+    renderEdResults();
+    if (!S.edRes.length) edMsg('#ed-s-msg', t('noSongs'));
+  } catch (e) { edMsg('#ed-s-msg', t('netErr'), true); }
+}
+function renderEdResults() {
+  const ed = S.ed;
+  $('#ed-results').innerHTML = S.edRes.map((x, i) => {
+    const has = ed && (ed.ids.has(x.id) || ed.keys.has(trackKey(x)));
+    return `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(x.a)}</span></span>
+      <button type="button" class="mini ${has ? 'on' : ''}" data-addi="${i}" ${has ? 'disabled' : ''}>${esc(has ? t('added') : t('add'))}</button></li>`;
+  }).join('');
+}
+
+/* --- add a public Deezer playlist into the family list --- */
+async function edPlaylistSearch() {
+  const q = $('#ed-pq').value.trim(); if (!q) return;
+  edMsg('#ed-p-msg', '');
+  $('#ed-ppreview').classList.add('hidden');
+  try {
+    const res = await dz('search/playlist', { q, limit: 15 });
+    const items = (res.data || []).filter(p => p && p.id);
+    $('#ed-presults').innerHTML = items.length ? playlistResults(items, 'data-edpl') : '';
+    if (!items.length) edMsg('#ed-p-msg', t('noResults'));
+  } catch (e) { edMsg('#ed-p-msg', t('netErr'), true); }
+}
+async function edPlaylistPreview(id, hint) {
+  $('#ed-presults').innerHTML = '';
+  const box = $('#ed-ppreview'); box.classList.remove('hidden');
+  $('#ed-ptitle').textContent = hint.title || '';
+  const img = $('#ed-ppic');
+  if (hint.pic) { img.src = hint.pic; img.classList.remove('hidden'); } else img.classList.add('hidden');
+  $('#ed-plist').innerHTML = ''; $('#ed-addall').classList.add('hidden');
+  $('#ed-pstatus').textContent = t('loadingPl', { n: '' });
+  try {
+    const { info, tracks } = await fetchPlaylistTracks(id, n => { $('#ed-pstatus').textContent = t('loadingPl', { n }); });
+    S.edPl = { title: info.title, tracks };
+    $('#ed-ptitle').textContent = info.title;
+    $('#ed-pstatus').textContent = t('songsCount', { n: tracks.length });
+    $('#ed-plist').innerHTML = songRows(tracks);
+    const b = $('#ed-addall');
+    b.textContent = t('addAll', { n: tracks.length });
+    b.classList.toggle('hidden', !tracks.length);
+    if (!tracks.length) edMsg('#ed-p-msg', t('plEmpty'), true);
+  } catch (e) { box.classList.add('hidden'); edMsg('#ed-p-msg', t('plError'), true); }
 }
 
 async function uniqueCode() {
@@ -1325,6 +1860,25 @@ document.addEventListener('click', e => {
   if (hostEl) hostAction(hostEl.dataset.host, hostEl);
   const gEl = e.target.closest('[data-guess]');
   if (gEl) submitGuess(gEl.dataset.guess);
+  const libPick = e.target.closest('[data-libpick]');
+  if (libPick) pickFamilyList(libPick.dataset.libpick);
+  const openL = e.target.closest('[data-openlist]');
+  if (openL) openEditor(openL.dataset.openlist);
+  const rmEl = e.target.closest('[data-rm]');
+  if (rmEl) edRemove(rmEl.dataset.rm);
+  const tabEl = e.target.closest('[data-tab]');
+  if (tabEl) setEdTab(tabEl.dataset.tab);
+  const addEl = e.target.closest('[data-addi]');
+  if (addEl && S.edRes[+addEl.dataset.addi]) { edAdd([S.edRes[+addEl.dataset.addi]]); renderEdResults(); }
+  const missEl = e.target.closest('[data-miss]');
+  if (missEl && S.missing[+missEl.dataset.miss]) {
+    missEl.classList.add('done');
+    setEdTab('search');
+    $('#ed-q').value = searchTextFor(S.missing[+missEl.dataset.miss]);
+    edSearch();
+  }
+  const edPl = e.target.closest('[data-edpl]');
+  if (edPl) edPlaylistPreview(edPl.dataset.edpl, { title: edPl.dataset.title, pic: edPl.dataset.pic });
   const plEl = e.target.closest('[data-pl]');
   if (plEl) {
     $('#pl-results').innerHTML = '';
@@ -1394,6 +1948,49 @@ $('#btn-leave-end').addEventListener('click', () => leaveRoom());
 $('#dlg-leave').addEventListener('click', () => { $('#dlg').close(); leaveRoom(); });
 $('#dlg-close').addEventListener('click', () => $('#dlg').close());
 $('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) $('#dlg').close(); });
+
+$('#btn-lib').addEventListener('click', () => openLibrary('home'));
+$('#setup-manage').addEventListener('click', () => openLibrary('setup'));
+$('#lib-back').addEventListener('click', () => {
+  if (S.libReturn === 'setup') { renderSetupLists(); show('setup'); } else show('home');
+});
+$('#lib-create').addEventListener('click', createList);
+$('#lib-new').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); createList(); } });
+$('#ed-back').addEventListener('click', () => { S.ed = null; openLibrary(); });
+$('#ed-name').addEventListener('change', () => {
+  const n = $('#ed-name').value.trim().slice(0, 40);
+  if (!S.ed) return;
+  if (!n) { $('#ed-name').value = S.ed.name; return; }
+  S.ed.name = n; edSave();
+});
+$('#ed-file').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { const txt = String(rd.result || ''); $('#ed-paste').value = txt; runImport(txt); };
+  rd.readAsText(f);
+  e.target.value = '';
+});
+$('#ed-import').addEventListener('click', () => runImport($('#ed-paste').value));
+$('#ed-search').addEventListener('click', edSearch);
+$('#ed-q').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); edSearch(); } });
+$('#ed-psearch').addEventListener('click', edPlaylistSearch);
+$('#ed-pq').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); edPlaylistSearch(); } });
+$('#ed-addall').addEventListener('click', () => {
+  if (!S.edPl) return;
+  const r = edAdd(S.edPl.tracks);
+  toast(t('importDone', { found: r.added, dup: r.dup }), true);
+});
+$('#ed-filter').addEventListener('input', renderEditorSongs);
+$('#ed-delete').addEventListener('click', async () => {
+  const ed = S.ed; if (!ed) return;
+  if (!confirm(t('confirmDelete', { name: ed.name }))) return;
+  try {
+    clearTimeout(edSaveT);
+    await db.ref().update({ ['lists/' + ed.id]: null, ['listTracks/' + ed.id]: null });
+    S.ed = null; openLibrary();
+  } catch (e) { toast(t('netErr')); }
+});
+$('#pl-peek-btn').addEventListener('click', togglePeek);
 
 setupAC('artist');
 setupAC('title');
