@@ -174,6 +174,7 @@ input:disabled{background:var(--soft);opacity:.7}
 
 /* lists & library */
 .sub{color:var(--muted);font-weight:500;margin:0 0 12px}
+select{width:100%;font:500 17px var(--body);padding:10px 12px;border:2.5px solid var(--ink);border-radius:14px;background:var(--panel);color:var(--ink);min-height:50px}
 textarea{width:100%;font:500 16px var(--body);padding:12px 14px;border:2.5px solid var(--ink);border-radius:14px;background:var(--panel);color:var(--ink);resize:vertical;min-height:110px}
 textarea::placeholder{color:var(--muted);opacity:.85}
 .more summary{cursor:pointer;font-weight:600;padding:8px 0}
@@ -538,7 +539,11 @@ dialog h2{margin-bottom:16px}
 
 <dialog id="dlg-add">
   <h2 data-t="addSongTitle"></h2>
-  <p class="sub" id="add-sub"></p>
+  <p class="sub" data-t="addSubGame"></p>
+  <div class="field" style="margin-bottom:12px">
+    <label class="lab" for="add-list" data-t="saveTo"></label>
+    <select id="add-list"></select>
+  </div>
   <div class="row">
     <input id="add-q" type="text" autocomplete="off" enterkeyhint="search" data-tp="addSongPh">
     <button class="btn" id="add-search" data-t="search"></button>
@@ -663,7 +668,8 @@ const STR = {
     addSongBtn: "+ Add a song to the game", addSongTitle: "Add a song",
     addSongPh: "Song, artist or a Deezer link",
     addSubLib: "Songs you add join this game and are saved to the list \"{name}\".",
-    addSubGame: "Songs you add join this game.",
+    addSubGame: "Songs you add join this game right away.",
+    saveTo: "Also save to a family list", noSave: "Don't save to a list",
     songAdded: "Song added to the game!", alreadyInGame: "That song is already in the game.",
     shortTrackLink: "Short share links can't be read here. Search by name instead."
   },
@@ -750,7 +756,8 @@ const STR = {
     addSongBtn: "+ הוספת שיר למשחק", addSongTitle: "הוספת שיר",
     addSongPh: "שיר, מבצע או קישור לדיזר",
     addSubLib: "שירים שתוסיפו ייכנסו למשחק הזה וגם יישמרו ברשימה \"{name}\".",
-    addSubGame: "שירים שתוסיפו ייכנסו למשחק הזה.",
+    addSubGame: "שירים שתוסיפו ייכנסו מיד למשחק הזה.",
+    saveTo: "לשמור גם ברשימה משפחתית", noSave: "לא לשמור ברשימה",
     songAdded: "השיר נוסף למשחק!", alreadyInGame: "השיר הזה כבר נמצא במשחק.",
     shortTrackLink: "אי אפשר לקרוא כאן קישורי שיתוף מקוצרים. אפשר לחפש לפי שם."
   }
@@ -1007,6 +1014,8 @@ function detach() {
   if (S.ref && S.roomCb) S.ref.off('value', S.roomCb);
   if (S.connRef && S.connCb) S.connRef.off('value', S.connCb);
   S.ref = S.roomCb = S.connRef = S.connCb = null;
+  if (S.playsRef && S.playsCb) S.playsRef.off('value', S.playsCb);
+  S.playsRef = S.playsCb = S.playsKey = null; S.plays = {};
 }
 
 function leaveRoom(silent) {
@@ -1035,6 +1044,7 @@ function onRoom(room) {
   if (room.status !== 'ended') S.endRung = false;
   $('#dlg-leave').classList.remove('hidden');
   renderCurrent();
+  watchPlays();
   if (room.status === 'playing') handleAudio();
   else { stopAudio(); S.lastKey = null; }
 }
@@ -1312,11 +1322,37 @@ async function submitGuess(kind) {
 }
 
 /* ---------- Host actions ---------- */
+/* Songs are random, but songs heard in earlier games wait their turn:
+   never-heard songs come first, then the ones heard longest ago. */
+function playsKey() {
+  const id = S.room && S.room.settings && S.room.settings.plId;
+  return id ? String(id).replace(/[.#$\[\]\/]/g, '_') : null;
+}
+function watchPlays() {
+  const k = (S.code && S.isHost) ? playsKey() : null;
+  if (k === S.playsKey) return;
+  if (S.playsRef && S.playsCb) S.playsRef.off('value', S.playsCb);
+  S.playsKey = k; S.plays = {}; S.playsRef = null; S.playsCb = null;
+  if (!k) return;
+  S.playsRef = db.ref('plays/' + k);
+  S.playsCb = S.playsRef.on('value', snap => { S.plays = snap.val() || {}; }, () => { S.plays = {}; });
+}
+function markPlayed(idx) {
+  const k = playsKey(), tr = S.room && S.room.tracks && S.room.tracks[idx];
+  if (k && tr) db.ref('plays/' + k + '/' + tr.id).set(SV).catch(() => {});
+}
 function pickIndex(played) {
   const tracks = S.room.tracks || [];
   const avail = [];
-  for (let i = 0; i < tracks.length; i++) if (!(played && played[i])) avail.push(i);
-  return avail.length ? avail[Math.floor(Math.random() * avail.length)] : -1;
+  for (let i = 0; i < tracks.length; i++) if (tracks[i] && !(played && played[i])) avail.push(i);
+  if (!avail.length) return -1;
+  const last = i => (S.plays && S.plays[tracks[i].id]) || 0;
+  let pool = avail.filter(i => !last(i));
+  if (!pool.length) {
+    const sorted = avail.slice().sort((a, b) => last(a) - last(b));
+    pool = sorted.slice(0, Math.max(1, Math.ceil(sorted.length * 0.3)));
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 async function startGame() {
@@ -1324,7 +1360,7 @@ async function startGame() {
   if (idx < 0) return;
   const up = { status: 'playing', startedAt: SV, played: { [idx]: true }, round: { num: 1, idx, level: 0, state: 'guessing' } };
   sortedPlayers().forEach(p => { up['players/' + p.id + '/score'] = 0; });
-  try { await S.ref.update(up); } catch (e) { toast(t('netErr')); }
+  try { await S.ref.update(up); markPlayed(idx); } catch (e) { toast(t('netErr')); }
 }
 
 async function nextSong() {
@@ -1337,7 +1373,7 @@ async function nextSong() {
   const up = {};
   up['played/' + idx] = true;
   up.round = { num: num + 1, idx, level: 0, state: 'guessing' };
-  try { await S.ref.update(up); } catch (e) { toast(t('netErr')); }
+  try { await S.ref.update(up); markPlayed(idx); } catch (e) { toast(t('netErr')); }
 }
 
 async function endGame() {
@@ -1847,7 +1883,12 @@ function openAddSong() {
   S.addRes = [];
   $('#add-q').value = ''; $('#add-results').innerHTML = ''; edMsg('#add-msg', '');
   const st = S.room.settings || {};
-  $('#add-sub').textContent = String(st.plId || '').startsWith('lib:') ? t('addSubLib', { name: st.plTitle }) : t('addSubGame');
+  const gameList = String(st.plId || '').startsWith('lib:') ? st.plId.slice(4) : null;
+  const ls = sortedLists();
+  const sel = $('#add-list');
+  sel.innerHTML = `<option value="">${esc(t('noSave'))}</option>` + ls.map(l => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join('');
+  const pref = gameList && S.lists[gameList] ? gameList : LS.get('addList', '');
+  sel.value = S.lists[pref] ? pref : '';
   $('#dlg-add').showModal();
   setTimeout(() => $('#add-q').focus(), 60);
 }
@@ -1898,8 +1939,7 @@ async function addToRoom(x, btn) {
     });
     if (!res.committed) { edMsg('#add-msg', t('alreadyInGame')); renderAddRes(); return; }
     await S.ref.child('settings/ver').set(Date.now());
-    const st = S.room.settings || {};
-    const lid = String(st.plId || '').startsWith('lib:') ? st.plId.slice(4) : null;
+    const lid = $('#add-list').value || null;
     if (lid && S.lists[lid]) {
       const r2 = await db.ref('listTracks/' + lid).transaction(cur => {
         const arr = asArray(cur);
@@ -2120,6 +2160,7 @@ $('#lib-file').addEventListener('change', e => {
 $('#add-search').addEventListener('click', addSearch);
 $('#add-q').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addSearch(); } });
 $('#add-close').addEventListener('click', () => $('#dlg-add').close());
+$('#add-list').addEventListener('change', e => LS.set('addList', e.target.value));
 $('#dlg-add').addEventListener('click', e => { if (e.target === $('#dlg-add')) $('#dlg-add').close(); });
 
 setupAC('artist');
