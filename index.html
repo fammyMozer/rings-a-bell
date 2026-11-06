@@ -242,6 +242,11 @@ textarea::placeholder{color:var(--muted);opacity:.85}
 .hostbar .btn{flex:1;border-color:var(--bg);box-shadow:3px 3px 0 rgba(0,0,0,.35)}
 .hostcap{max-width:520px;margin:0 auto 8px;color:var(--bg);font-size:14px;font-weight:600;opacity:.85}
 
+/* new version banner */
+.update{position:fixed;inset-inline:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:60;max-width:496px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--ink);color:var(--panel);border-radius:18px;padding:12px 12px 12px 16px;box-shadow:4px 4px 0 rgba(0,0,0,.3);font-weight:600}
+.update span{flex:1}
+.update .btn{min-height:44px;font-size:16px;padding:8px 16px;box-shadow:none;border-color:var(--panel)}
+
 /* toast */
 .toast{position:fixed;inset-inline:16px;top:calc(12px + env(safe-area-inset-top,0px));z-index:50;max-width:488px;margin:0 auto;background:var(--ink);color:var(--bg);font-weight:600;font-size:18px;padding:14px 18px;border-radius:16px;box-shadow:4px 4px 0 rgba(0,0,0,.3);text-align:center;transform:translateY(-140%);transition:transform .25s}
 .toast.show{transform:translateY(0)}
@@ -627,6 +632,7 @@ dialog h2{margin-bottom:16px}
 </dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="update hidden" id="update" role="status"><span data-t="updateReady"></span><button class="btn primary" id="update-btn" data-t="updateNow"></button></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -727,6 +733,7 @@ const STR = {
     volume: "Volume on this device",
     fullLoading: "Loading the full song…", fullSpNote: "Plays the whole song if you're signed in to Spotify (free or Premium) in this browser. Otherwise you'll hear a preview.",
     openIn: "Open in {app}", waitCtl: "Waiting for the host…",
+    updateReady: "A new version of the game is ready", updateNow: "Update",
     installApp: "Install the app on this phone", installed: "Installed! You'll find Rings a Bell on your home screen.",
     familyLists: "Family song lists", manageLists: "Create or edit family lists",
     libTitle: "Family lists", libIntro: "Lists saved here are shared with everyone who plays.",
@@ -829,6 +836,7 @@ const STR = {
     volume: "עוצמת הצליל במכשיר הזה",
     fullLoading: "טוען את השיר המלא…", fullSpNote: "השיר המלא מתנגן אם מחוברים לספוטיפיי (חינמי או פרימיום) בדפדפן הזה. אחרת יתנגן קטע קצר.",
     openIn: "פתיחה ב{app}", waitCtl: "מחכים למנחה…",
+    updateReady: "גרסה חדשה של המשחק מוכנה", updateNow: "עדכון",
     installApp: "התקנת האפליקציה בטלפון", installed: "הותקן! Rings a Bell מחכה לך במסך הבית.",
     familyLists: "רשימות השירים המשפחתיות", manageLists: "יצירה ועריכה של רשימות משפחתיות",
     libTitle: "רשימות משפחתיות", libIntro: "הרשימות כאן משותפות לכל מי שמשחק.",
@@ -2598,8 +2606,33 @@ window.addEventListener('appinstalled', () => {
 });
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(reg => { try { reg.update(); } catch (e) {} }).catch(() => {});
 }
+
+/* ---------- New version check ----------
+   When a newer version is uploaded, players get a small "Update" banner.
+   Updating reloads the page and puts them straight back in their room. */
+const APP_VERSION = '2026-11-06b';
+async function checkVersion() {
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+  try {
+    const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return;
+    const j = await r.json();
+    if (j && j.v && j.v !== APP_VERSION) $('#update').classList.remove('hidden');
+  } catch (e) {}
+}
+$('#update-btn').addEventListener('click', () => {
+  try { if (S.code) sessionStorage.setItem('rab:rejoin', S.code); } catch (e) {}
+  location.reload();
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkVersion(); });
+setInterval(checkVersion, 15 * 60 * 1000);
+checkVersion();
+try {
+  const rj = sessionStorage.getItem('rab:rejoin');
+  if (rj) { sessionStorage.removeItem('rab:rejoin'); if (me.name) joinRoom(rj); }
+} catch (e) {}
 })();
 </script>
 </body>
