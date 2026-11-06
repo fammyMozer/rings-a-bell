@@ -907,6 +907,33 @@ function t(k, v) {
   const s = (k in table) ? table[k] : (STR.en[k] || k);
   return s.replace(/\{(\w+)\}/g, (_, x) => (v[x] != null ? v[x] : ''));
 }
+/* Israeli artists appear on Deezer under English names. The game shows the
+   Hebrew name and accepts a guess in either language. */
+const HEB_ARTISTS = {
+  'arik einstein': 'אריק איינשטיין', 'shalom hanoch': 'שלום חנוך', 'kaveret': 'כוורת', 'shlomo artzi': 'שלמה ארצי',
+  'ofra haza': 'עפרה חזה', 'svika pick': 'צביקה פיק', 'izhar cohen': 'יזהר כהן', 'gali atari': 'גלי עטרי',
+  'chava alberstein': 'חוה אלברשטיין', 'zohar argov': 'זהר ארגוב', 'mashina': 'משינה', 'yehuda poliker': 'יהודה פוליקר',
+  'rita': 'ריטה', 'aviv geffen': 'אביב גפן', 'dana international': 'דנה אינטרנשיונל', 'zehava ben': 'זהבה בן',
+  'the idan raichel project': 'הפרויקט של עידן רייכל', 'idan raichel': 'עידן רייכל', 'sarit hadad': 'שרית חדד',
+  'omer adam': 'עומר אדם', 'static ben el tavori': 'סטטיק ובן אל תבורי', 'static ben el': 'סטטיק ובן אל',
+  'static': 'סטטיק', 'ben el tavori': 'בן אל תבורי', 'ben el': 'בן אל', 'netta': 'נטע', 'netta barzilai': 'נטע ברזילי',
+  'noa kirel': 'נועה קירל', 'eden golan': 'עדן גולן', 'eden ben zaken': 'עדן בן זקן', 'eyal golan': 'אייל גולן',
+  'ehud banai': 'אהוד בנאי', 'berry sakharof': 'ברי סחרוף', 'ishay ribo': 'ישי ריבו', 'idan amedi': 'עידן עמדי',
+  'rami kleinstein': 'רמי קלינשטיין', 'matti caspi': 'מתי כספי', 'yehoram gaon': 'יהורם גאון', 'ilanit': 'אילנית',
+  'shlomi shabat': 'שלומי שבת', 'moshe peretz': 'משה פרץ', 'itay levi': 'איתי לוי', 'ninet tayeb': 'נינט טייב',
+  'harel skaat': 'הראל סקעת', 'keren peles': 'קרן פלס', 'ivri lider': 'עברי לידר', 'hadag nahash': 'הדג נחש',
+  'teapacks': 'טיפקס', 'mosh ben ari': 'מוש בן ארי', 'kobi peretz': 'קובי פרץ', 'gidi gov': 'גידי גוב',
+  'yehudit ravitz': 'יהודית רביץ', 'meir ariel': 'מאיר אריאל', 'yoni rechter': 'יוני רכטר', 'arkadi duchin': 'ארקדי דוכין',
+  'danny sanderson': 'דני סנדרסון', 'haim moshe': 'חיים משה', 'boaz sharabi': 'בועז שרעבי', 'yardena arazi': 'ירדנה ארזי',
+  'avraham tal': 'אברהם טל', 'amir dadon': 'אמיר דדון', 'ethnix': 'אתניקס', 'shotei hanevua': 'שוטי הנבואה',
+  'shuli rand': 'שולי רנד', 'dudu aharon': 'דודו אהרון', 'margalit tzanani': 'מרגלית צנעני', 'the parvarim': 'הפרברים',
+  'hagashash hachiver': 'הגשש החיוור', 'ehud manor': 'אהוד מנור', 'nathan goshen': 'נתן גושן', 'lior narkis': 'ליאור נרקיס',
+  'subliminal': 'סאבלימינל', 'the shadow': 'הצל', 'tuna': 'טונה', 'jasmin moallem': 'יסמין מועלם', 'anna zak': 'אנה זק'
+};
+const HEB_BY_NAME = Object.fromEntries(Object.entries(HEB_ARTISTS).map(([k, v]) => [v, k]));
+const hasHeb = s => /[\u0590-\u05FF]/.test(String(s || ''));
+const heArtist = tr => (tr && (tr.ah || HEB_ARTISTS[norm(tr.a)])) || '';
+const showArtist = tr => (tr && (heArtist(tr) || tr.a)) || '';
 const appName = id => (APPS[id] || APPS.spotify)[prefs.lang] || APPS.spotify.en;
 const secLabel = s => (s === 0.5 ? '½' : String(s));
 
@@ -1317,7 +1344,7 @@ function buildLists(tracks) {
     arr.forEach(v => { const n = norm(v); if (n && !m.has(n)) m.set(n, { v, n, w: n.split(' ') }); });
     return Array.from(m.values()).sort((a, b) => a.v.localeCompare(b.v));
   };
-  S.artists = uniq(tracks.map(x => x && x.a));
+  S.artists = uniq([].concat(...tracks.map(x => x ? [x.a, heArtist(x)] : [])).filter(Boolean));
   S.titles = uniq(tracks.map(x => x && x.t));
 }
 
@@ -1434,7 +1461,7 @@ function renderGame() {
   $('#g-hintbtn').classList.toggle('hidden', !(ctl && !revealed && !r.hint && !S.hintBusy));
 
   slot('#slot-title', r.titleBy, tr.t, revealed);
-  slot('#slot-artist', r.artistBy, tr.a, revealed);
+  slot('#slot-artist', r.artistBy, showArtist(tr), revealed);
 
   $('#g-guess').classList.toggle('hidden', revealed);
   $('#in-artist').disabled = !!r.artistBy;
@@ -1482,7 +1509,7 @@ function renderReveal() {
   if (!revealed || !tr) return;
   $('#g-rhead').textContent = r.titleBy ? t('revealFound') : t('revealGaveUp');
   $('#g-rtitle').textContent = tr.t;
-  $('#g-rartist').textContent = tr.a;
+  $('#g-rartist').textContent = showArtist(tr);
   const cover = P.meta && P.meta.id === tr.id && P.meta.album ? (P.meta.album.cover_medium || P.meta.album.cover || '') : '';
   const img = $('#g-cover');
   if (cover) { if (img.getAttribute('src') !== cover) img.src = cover; img.classList.remove('hidden'); }
@@ -1592,8 +1619,8 @@ async function submitGuess(kind) {
   const input = $('#in-' + kind);
   const text = input.value.trim();
   if (!r || !tr || r.state !== 'guessing' || !text) return;
-  const target = kind === 'artist' ? tr.a : tr.t;
-  if (norm(text) !== norm(target)) {
+  const targets = kind === 'artist' ? [tr.a, heArtist(tr)] : [tr.t];
+  if (!targets.some(x => x && norm(x) === norm(text))) {
     input.value = '';
     input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
     toast(t('nope'));
@@ -1819,7 +1846,7 @@ function renderSetupSave() {
 }
 
 function songRows(tracks) {
-  return tracks.map(x => `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(x.a)}</span></span></li>`).join('');
+  return tracks.map(x => `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(showArtist(x))}</span></span></li>`).join('');
 }
 
 function renderPicked(statusText) {
@@ -2037,7 +2064,7 @@ function edAdd(list) {
   list.forEach(x => {
     const k = trackKey(x);
     if (ed.ids.has(x.id) || ed.keys.has(k)) { dup++; return; }
-    ed.tracks.push({ id: x.id, t: x.t, a: x.a }); ed.ids.add(x.id); ed.keys.add(k); added++;
+    ed.tracks.push(x.ah ? { id: x.id, t: x.t, a: x.a, ah: x.ah } : { id: x.id, t: x.t, a: x.a }); ed.ids.add(x.id); ed.keys.add(k); added++;
   });
   if (added) { edSave(); renderEditorSongs(); }
   return { added, dup };
@@ -2053,8 +2080,8 @@ function renderEditorSongs() {
   const ed = S.ed; if (!ed) return;
   $('#ed-count').textContent = t('songsInList', { n: ed.tracks.length });
   const q = norm($('#ed-filter').value);
-  const shown = q ? ed.tracks.filter(x => norm(x.t + ' ' + x.a).includes(q)) : ed.tracks;
-  $('#ed-songs').innerHTML = shown.slice().reverse().map(x => `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(x.a)}</span></span>
+  const shown = q ? ed.tracks.filter(x => norm(x.t + ' ' + x.a + ' ' + heArtist(x)).includes(q)) : ed.tracks;
+  $('#ed-songs').innerHTML = shown.slice().reverse().map(x => `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(showArtist(x))}</span></span>
     <button type="button" class="mini" data-rm="${x.id}" aria-label="${esc(t('remove'))}">✕</button></li>`).join('');
   $('#ed-empty').classList.toggle('hidden', !(ed.loaded && !ed.tracks.length));
 }
@@ -2202,10 +2229,20 @@ async function matchItem(it) {
   const tries = [];
   if (it.title || it.artist) tries.push([it.artist || '', it.title || it.artist]);
   else if (it.p1) tries.push([it.p1, it.p2], [it.p2, it.p1]);
-  for (const [artist, title] of tries) {
+  for (const [artistIn, title] of tries) {
     if (!title) continue;
+    /* "אריק איינשטיין (Arik Einstein)" or a known Hebrew name: search with the
+       English name, remember the Hebrew one for display */
+    let artist = artistIn, alias = '';
+    const m = String(artistIn || '').match(/^(.*[\u0590-\u05FF].*?)\s*\(([^)]*[A-Za-z][^)]*)\)\s*$/);
+    if (m) { alias = m[1].trim(); artist = m[2].trim(); }
+    else if (hasHeb(artistIn)) { alias = String(artistIn).trim(); if (HEB_BY_NAME[alias]) artist = HEB_BY_NAME[alias]; }
     const c = await findTrack(artist, title);
-    if (c) return mkTrack(c);
+    if (c) {
+      const tr = mkTrack(c);
+      if (alias && !hasHeb(tr.a) && !HEB_ARTISTS[norm(tr.a)]) tr.ah = alias;
+      return tr;
+    }
   }
   if (!it.title && !it.artist && !it.p1) {
     const res = (await searchTracks(it.raw, 15)).filter(c => !BAD_VARIANT.test(vtitle(c)));
@@ -2270,7 +2307,7 @@ function renderEdResults() {
   const ed = S.ed;
   $('#ed-results').innerHTML = S.edRes.map((x, i) => {
     const has = ed && (ed.ids.has(x.id) || ed.keys.has(trackKey(x)));
-    return `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(x.a)}</span></span>
+    return `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(showArtist(x))}</span></span>
       <button type="button" class="mini ${has ? 'on' : ''}" data-addi="${i}" ${has ? 'disabled' : ''}>${esc(has ? t('added') : t('add'))}</button></li>`;
   }).join('');
 }
@@ -2355,7 +2392,7 @@ function inRoom(x) {
 function renderAddRes() {
   $('#add-results').innerHTML = S.addRes.map((x, i) => {
     const has = inRoom(x);
-    return `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(x.a)}</span></span>
+    return `<li><span class="si"><span class="st">${esc(x.t)}</span><span class="sa">${esc(showArtist(x))}</span></span>
       <button type="button" class="mini ${has ? 'on' : ''}" data-addroom="${i}" ${has ? 'disabled' : ''}>${esc(has ? t('added') : t('add'))}</button></li>`;
   }).join('');
 }
@@ -2364,7 +2401,7 @@ async function addToRoom(x, btn) {
   if (!S.ref || !x) return;
   if (btn) btn.disabled = true;
   const k = trackKey(x);
-  const item = { id: x.id, t: x.t, a: x.a };
+  const item = x.ah ? { id: x.id, t: x.t, a: x.a, ah: x.ah } : { id: x.id, t: x.t, a: x.a };
   try {
     const res = await S.ref.child('tracks').transaction(cur => {
       if (!cur) return;
@@ -2683,7 +2720,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 /* ---------- New version check ----------
    When a newer version is uploaded, players get a small "Update" banner.
    Updating reloads the page and puts them straight back in their room. */
-const APP_VERSION = '2026-11-06d';
+const APP_VERSION = '2026-11-06e';
 async function checkVersion() {
   if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
   try {
