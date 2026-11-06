@@ -1682,17 +1682,39 @@ async function endGame() {
 
 /* Year hint: the earliest release year among this artist's versions of the song,
    so a greatest-hits album or a remaster doesn't give a late year. */
+/* Original year from MusicBrainz (an open music database that records each
+   recording's first release). Deezer only knows the dates of the albums it
+   sells, which for older songs are usually later reissues or collections. */
+async function mbYear(tr) {
+  try {
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 7000);
+    const q = `recording:"${cleanTitle(tr.t).replace(/"/g, '')}" AND artist:"${firstArtist(tr.a).replace(/"/g, '')}"`;
+    const r = await fetch('https://musicbrainz.org/ws/2/recording?fmt=json&limit=25&query=' + encodeURIComponent(q), { signal: ctl.signal });
+    clearTimeout(tm);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const years = (j.recordings || []).filter(x => (x.score || 0) >= 80 && titleSim(tr.t, x.title) >= 0.9
+      && (x['artist-credit'] || []).some(ac => ac.artist && [ac.name, ac.artist.name, ac.artist['sort-name']].some(n => n && artistSim(tr.a, n) >= 0.8)))
+      .map(x => parseInt(String(x['first-release-date'] || '').slice(0, 4), 10))
+      .filter(y => y > 1900 && y <= new Date().getFullYear());
+    return years.length ? Math.min(...years) : null;
+  } catch (e) { return null; }
+}
 async function findYear(tr) {
+  const mb = await mbYear(tr);
+  if (mb) return mb;
   const years = [];
   const add = d => { const y = parseInt(String((d && d.release_date) || '').slice(0, 4), 10); if (y > 1900 && y <= new Date().getFullYear()) years.push(y); };
   try { add(P.meta && P.meta.id === tr.id ? P.meta : await dz('track/' + tr.id)); } catch (e) {}
   let cands = [];
   try {
-    const q = `artist:"${String(tr.a).replace(/"/g, '')}" track:"${cleanTitle(tr.t).replace(/"/g, '')}"`;
-    const r = await dz('search', { q, limit: 25 });
-    const want = norm(cleanTitle(tr.t)), wa = norm(firstArtist(tr.a));
-    cands = (r.data || []).filter(c => c && c.id !== tr.id && c.artist && norm(firstArtist(c.artist.name)) === wa
-      && norm(cleanTitle(c.title_short || c.title)) === want && !isCover(c)).slice(0, 8);
+    const at = await artistTop(tr.a);
+    const r = await dz('search', { q: firstArtist(tr.a) + ' ' + cleanTitle(tr.t), limit: 25 });
+    const same = c => c && c.id !== tr.id && c.artist && !isCover(c)
+      && ((at.a && c.artist.id === at.a.id) || artistSim(tr.a, c.artist.name) >= 0.8)
+      && titleSim(tr.t, c.title_short || c.title) >= 0.9;
+    const seen = new Set();
+    cands = at.top.concat(r.data || []).filter(c => same(c) && !seen.has(c.id) && seen.add(c.id)).slice(0, 10);
   } catch (e) {}
   await pool(cands, 3, async c => { try { add(await dz('track/' + c.id)); } catch (e) {} });
   return years.length ? Math.min(...years) : null;
@@ -1845,7 +1867,7 @@ function parsePlaylist(s) {
 const mkTrack = x => ({ id: x.id, t: x.title_short || x.title, a: x.artist.name });
 const playable = x => x && x.id && x.readable !== false && x.preview && x.artist;
 /* Karaoke, tribute and "made famous by" versions are left out. */
-const COVER_RE = /karaoke|tribute|cover(ed)? by|\(cover\)|cover version|made famous|in the style of|originally (performed|by|recorded)|backing track|instrumental version|8[- ]?bit|lullaby|music box|sing[- ]?along|re-?recorded by|performed by|playback version|as popularized/i;
+const COVER_RE = /karaoke|tribute|cover(ed)? by|[\(\[][^\)\]]*\bcover\b[^\)\]]*[\)\]]|cover version|made famous|in the style of|originally (performed|by|recorded)|backing track|instrumental version|8[- ]?bit|16[- ]?bit|lullaby|music box|sing[- ]?along|re-?recorded by|performed by|playback version|as popularized|emulation|fitness|workout|acapella|a cappella|rendu c[ée]l[èe]bre/i;
 const isCover = x => COVER_RE.test([x.title, x.title_version, x.artist && x.artist.name, x.album && x.album.title].filter(Boolean).join(' | '));
 const goodTrack = x => playable(x) && !isCover(x);
 
@@ -2096,7 +2118,7 @@ function parseImport(text) {
 }
 
 const cleanTitle = s => String(s || '')
-  .replace(/\s*[\(\[][^\)\]]*[\)\]]/g, m => /remaster|feat|ft\.|version|mono|stereo|edit|bonus|deluxe|live|mix|from /i.test(m) ? '' : m)
+  .replace(/\s*[\(\[][^\)\]]*[\)\]]/g, m => /remaster|feat|ft\.|with |version|mono|stereo|edit|bonus|deluxe|live|mix|from |theme/i.test(m) ? '' : m)
   .replace(/\s+-\s+.*(remaster|version|edit|mono|stereo|live|mix).*$/i, '').trim();
 const firstArtist = s => String(s || '').split(/\s*(?:,|;|&|\sfeat\.?\s|\sft\.?\s|\sx\s)\s*/i)[0].trim();
 const toks = s => new Set(norm(cleanTitle(s)).split(' ').filter(w => w && !['the', 'a', 'feat', 'ft'].includes(w)));
@@ -2105,16 +2127,52 @@ function dice(a, b) {
   let n = 0; a.forEach(w => { if (b.has(w)) n++; });
   return 2 * n / (a.size + b.size);
 }
-function scoreCand(c, it) {
-  const ct = toks(c.title_short || c.title), ca = toks(c.artist.name);
-  if (it.title || it.artist) return dice(toks(it.title), ct) * 0.6 + dice(toks(firstArtist(it.artist)), ca) * 0.4;
-  if (it.p1) {
-    const a = dice(toks(it.p1), ca) * 0.4 + dice(toks(it.p2), ct) * 0.6;
-    const b = dice(toks(it.p2), ca) * 0.4 + dice(toks(it.p1), ct) * 0.6;
-    return Math.max(a, b);
+/* Matching a song to Deezer, checked against the real catalog:
+   1) find the artist and look the song up in the artist's top 100 tracks
+      (Deezer's general search often buries the studio original);
+   2) otherwise a plain search, keeping only tracks whose MAIN performer is the
+      requested artist (a remix or cover that just credits them is rejected);
+   3) remixes/instrumentals are never picked, and studio beats live/acoustic. */
+const BAD_VARIANT = /remix|\brmx\b|\bmix\b|sped up|slowed|nightcore|8d audio|refunk|rework|reloaded|club edit|bootleg|\bflip\b|mashup|rock version|piano version|instrumental|karaoke/i;
+const LIVEISH = /\blive\b|acoustic|stripped|unplugged|demo|session|rehearsal|performance/i;
+const vtitle = c => (c.title || '') + ' ' + (c.title_version || '');
+const wtoks = s => new Set(norm(s).split(' ').filter(w => w && !['the', 'a', 'feat', 'ft', 'and'].includes(w)));
+const titleSim = (q, c) => dice(wtoks(cleanTitle(q)), wtoks(cleanTitle(c)));
+const artistParts = q => [q].concat(String(q || '').split(/\s*(?:,|;|&|\band\b|\sfeat\.?\s|\sft\.?\s|\sx\s|\swith\s)\s*/i)).filter(x => x && x.trim());
+function artistSim(q, c) {
+  const b = norm(c); let best = 0;
+  for (const a of new Set([norm(q), norm(firstArtist(q))])) {
+    if (!a) continue;
+    if (a === b) return 1;
+    best = Math.max(best, dice(wtoks(a), wtoks(b)), dice(wtoks(a), wtoks(firstArtist(c))));
   }
-  const r = toks(it.raw), both = new Set([...ct, ...ca]);
-  return dice(both, r);
+  return best;
+}
+const ART = new Map();
+function artistTop(name) {
+  const key = norm(name);
+  if (!ART.has(key)) ART.set(key, (async () => {
+    try {
+      const r = await dz('search/artist', { q: firstArtist(name), limit: 5 });
+      const arts = (r.data || []).filter(a => a && artistSim(name, a.name) >= 0.8);
+      if (!arts.length) return { a: null, top: [] };
+      const a = arts.reduce((x, y) => ((y.nb_fan || 0) > (x.nb_fan || 0) ? y : x));
+      const t = await dz(`artist/${a.id}/top`, { limit: 100 });
+      return { a, top: t.data || [] };
+    } catch (e) { if (e.message === 'network' || e.message === 'timeout') ART.delete(key); return { a: null, top: [] }; }
+  })());
+  return ART.get(key);
+}
+function pickTrack(cands, title, wantsVariant, artist, artistId) {
+  const byArtist = c => !artist || (artistId && c.artist.id === artistId) || artistParts(artist).some(part => artistSim(part, c.artist.name) >= 0.8);
+  let ok = cands.filter(c => c && c.artist && goodTrack(c) && byArtist(c))
+    .map(c => ({ c, s: titleSim(title, c.title_short || c.title) }))
+    .filter(o => o.s >= 0.8 && (wantsVariant || !BAD_VARIANT.test(vtitle(o.c))));
+  if (!ok.length) return null;
+  if (!wantsVariant) { const studio = ok.filter(o => !LIVEISH.test(vtitle(o.c))); if (studio.length) ok = studio; }
+  const top = Math.max(...ok.map(o => o.s));
+  const near = ok.filter(o => o.s >= top - 0.1).sort((x, y) => (y.c.rank || 0) - (x.c.rank || 0));
+  return near[0].c;
 }
 async function searchTracks(q, limit) {
   try {
@@ -2122,28 +2180,41 @@ async function searchTracks(q, limit) {
     return (r.data || []).filter(goodTrack);
   } catch (e) { if (e.message === 'network' || e.message === 'timeout') throw e; return []; }
 }
-function bestOf(cands, it) {
-  const ok = cands.map(c => ({ c, s: scoreCand(c, it) })).filter(o => o.s >= 0.6);
-  if (!ok.length) return null;
-  const top = Math.max(...ok.map(o => o.s));
-  /* among near-equal matches, take the most popular (usually the original) */
-  const near = ok.filter(o => o.s >= top - 0.1).sort((a, b) => (b.c.rank || 0) - (a.c.rank || 0));
-  return mkTrack(near[0].c);
-}
 function searchTextFor(it) {
   if (it.title || it.artist) return (firstArtist(it.artist) + ' ' + cleanTitle(it.title)).trim();
   return it.raw.replace(/\s+[-\u2013\u2014]\s+|\t/g, ' ');
 }
-async function matchItem(it) {
-  if (it.isrc) {
-    try { const d = await dz('track/isrc:' + encodeURIComponent(it.isrc)); if (playable(d)) return mkTrack(d); } catch (e) {}
-  }
-  if (it.title && it.artist) {
-    const q = `artist:"${firstArtist(it.artist).replace(/"/g, '')}" track:"${cleanTitle(it.title).replace(/"/g, '')}"`;
-    const hit = bestOf(await searchTracks(q, 5), it);
+async function findTrack(artist, title) {
+  const wants = BAD_VARIANT.test(title) || LIVEISH.test(title);
+  let a = null;
+  if (artist) {
+    const r = await artistTop(artist); a = r.a;
+    const hit = pickTrack(r.top, title, wants, artist, a && a.id);
     if (hit) return hit;
   }
-  return bestOf(await searchTracks(searchTextFor(it), 10), it);
+  const res = await searchTracks(((artist ? firstArtist(artist) + ' ' : '') + cleanTitle(title)).trim(), 25);
+  return pickTrack(res, title, wants, artist, a && a.id);
+}
+async function matchItem(it) {
+  if (it.isrc) {
+    try { const d = await dz('track/isrc:' + encodeURIComponent(it.isrc)); if (goodTrack(d)) return mkTrack(d); } catch (e) {}
+  }
+  const tries = [];
+  if (it.title || it.artist) tries.push([it.artist || '', it.title || it.artist]);
+  else if (it.p1) tries.push([it.p1, it.p2], [it.p2, it.p1]);
+  for (const [artist, title] of tries) {
+    if (!title) continue;
+    const c = await findTrack(artist, title);
+    if (c) return mkTrack(c);
+  }
+  if (!it.title && !it.artist && !it.p1) {
+    const res = (await searchTracks(it.raw, 15)).filter(c => !BAD_VARIANT.test(vtitle(c)));
+    const want = wtoks(it.raw);
+    const ok = res.filter(c => dice(want, wtoks(cleanTitle(c.title_short || c.title) + ' ' + c.artist.name)) >= 0.75)
+      .sort((x, y) => (y.rank || 0) - (x.rank || 0));
+    if (ok.length) return mkTrack(ok[0]);
+  }
+  return null;
 }
 async function pool(items, n, fn) {
   let i = 0;
@@ -2612,7 +2683,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 /* ---------- New version check ----------
    When a newer version is uploaded, players get a small "Update" banner.
    Updating reloads the page and puts them straight back in their room. */
-const APP_VERSION = '2026-11-06b';
+const APP_VERSION = '2026-11-06d';
 async function checkVersion() {
   if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
   try {
