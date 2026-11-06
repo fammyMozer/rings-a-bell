@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1E1B4B">
+<meta name="theme-color" content="#D7192A">
 <title>Rings a Bell</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -13,8 +13,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Secular+One&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#FFD23F; --ink:#1E1B4B; --panel:#FFFFFF; --soft:#FFF0B3; --muted:#5B5785;
-  --hot:#D81E5B; --on-hot:#FFFFFF; --go:#0B8A54; --on-go:#FFFFFF; --dial:#3BCEAC; --shadow:#1E1B4B;
+  --bg:#F4F1F1; --ink:#1B1720; --panel:#FFFFFF; --soft:#FBE2E4; --muted:#665C6B;
+  --hot:#D7192A; --on-hot:#FFFFFF; --go:#0B8A54; --on-go:#FFFFFF; --dial:#D7192A; --shadow:#1B1720;
+  --hero:#D7192A; --on-hero:#FFFFFF; --clap:#1B1720;
   --display:"Secular One","Fredoka",system-ui,sans-serif;
   --body:"Fredoka",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
   color-scheme:light;
@@ -24,8 +25,9 @@
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#17153B; --ink:#FFF3C4; --panel:#25225A; --soft:#353080; --muted:#C2BDF0;
-    --hot:#FF5C8A; --on-hot:#17153B; --go:#2BD687; --on-go:#0E2A1C; --dial:#3BCEAC; --shadow:#08071C;
+    --bg:#141218; --ink:#F6EEEF; --panel:#221E28; --soft:#3B242A; --muted:#BDB2BF;
+    --hot:#E8293D; --on-hot:#FFFFFF; --go:#22C47C; --on-go:#0B2318; --dial:#FF5A6A; --shadow:#000000;
+    --hero:#B8141F; --on-hero:#FFFFFF; --clap:#141218;
     color-scheme:dark;
   }
 }
@@ -78,12 +80,25 @@ input:disabled{background:var(--soft);opacity:.7}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;min-height:50px}
 .tools{display:flex;gap:8px}
 .brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:20px}
-.brand svg{width:34px;height:34px}
+.brand svg{width:34px;height:34px;color:var(--hot)}
 .brand .rc{font-family:var(--body);font-weight:600;font-size:15px;border:2px solid var(--ink);border-radius:999px;padding:2px 10px;background:var(--panel);direction:ltr;unicode-bidi:isolate}
 
 /* hero */
-.hero{text-align:center;padding:10px 0 22px}
-.bigbell{width:132px;height:132px;margin:0 auto 6px;transform-origin:50% 12%}
+.hero{text-align:center;padding:2px 0 20px}
+.heroart{position:relative;height:208px;border-radius:28px;background:var(--hero);color:var(--on-hero);border:2.5px solid var(--ink);box-shadow:4px 4px 0 var(--shadow);overflow:hidden;margin-bottom:18px}
+.heroart .staff{position:absolute;left:0;right:0;top:58px;height:62px;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.3) 0 2px,transparent 2px 15px)}
+.heroart .bigbell{position:absolute;left:50%;top:18px;width:132px;height:132px;margin:0 0 0 -66px;color:#fff;--clap:#1B1720}
+.note{position:absolute;color:#fff;animation:float 3.4s ease-in-out infinite}
+.n1{left:9%;top:26px;width:40px;height:40px}
+.n2{right:9%;top:20px;width:46px;height:46px;animation-delay:-1.2s}
+.n3{right:23%;top:100px;width:28px;height:28px;animation-delay:-2.1s}
+.n4{left:22%;top:104px;width:28px;height:28px;animation-delay:-.7s}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-7deg)}50%{transform:translateY(-10px) rotate(7deg)}}
+.eq{position:absolute;left:0;right:0;bottom:0;height:44px;display:flex;align-items:flex-end;justify-content:center;gap:6px;padding:0 22px}
+.eq span{flex:1;max-width:13px;height:30%;background:rgba(255,255,255,.88);border-radius:4px 4px 0 0;animation:eq 1.15s ease-in-out infinite}
+.eq span:nth-child(2n){animation-delay:-.35s}.eq span:nth-child(3n){animation-delay:-.7s}.eq span:nth-child(5n){animation-delay:-.95s}.eq span:nth-child(7n){animation-delay:-.2s}
+@keyframes eq{0%,100%{height:18%}50%{height:96%}}
+.bigbell{width:132px;height:132px;margin:0 auto 6px;transform-origin:50% 12%;color:var(--hot)}
 .logo{font-size:clamp(48px,14vw,68px);letter-spacing:-.01em;line-height:1;direction:ltr}
 .tag{font-size:19px;font-weight:500;margin:10px 0 0}
 
@@ -91,7 +106,7 @@ input:disabled{background:var(--soft);opacity:.7}
 @keyframes ring{0%{transform:rotate(0)}12%{transform:rotate(16deg)}26%{transform:rotate(-13deg)}40%{transform:rotate(9deg)}54%{transform:rotate(-6deg)}68%{transform:rotate(3deg)}82%{transform:rotate(-1deg)}100%{transform:rotate(0)}}
 .ring{animation:ring 1.1s ease-out}
 .bellsvg{transform-origin:50% 14%}
-@media (prefers-reduced-motion: reduce){.ring{animation:none}.btn,.fill,.needle{transition:none}}
+@media (prefers-reduced-motion: reduce){.ring,.note,.eq span{animation:none}.btn,.fill,.needle{transition:none}}
 
 /* lobby */
 .codecap{font-weight:600;color:var(--muted)}
@@ -123,24 +138,53 @@ input:disabled{background:var(--soft);opacity:.7}
 .opt .num{display:flex;align-items:center;gap:6px}
 .opt .num input{width:84px;min-height:44px;padding:6px 10px;text-align:center}
 
-/* game */
-.roundline{display:flex;align-items:center;gap:10px;justify-content:space-between;margin:-2px 2px 12px;font-weight:600}
-.roundline .tl{color:var(--muted)}
-.stage{display:flex;align-items:center;gap:16px}
-.playbtn{width:84px;height:84px;border-radius:50%;border:3px solid var(--ink);background:var(--hot);color:var(--on-hot);display:grid;place-items:center;box-shadow:4px 4px 0 var(--shadow);cursor:pointer;flex:none;padding:0}
-.playbtn:active{transform:translate(4px,4px);box-shadow:none}
-.playbtn svg{width:40px;height:40px}
-@keyframes pulse{0%,100%{box-shadow:4px 4px 0 var(--shadow),0 0 0 0 var(--hot)}50%{box-shadow:4px 4px 0 var(--shadow),0 0 0 12px transparent}}
+/* game: control panel pinned to the top */
+.ctrl{position:sticky;top:0;z-index:25;background:var(--panel);border:2.5px solid var(--ink);border-top:0;border-radius:0 0 22px 22px;box-shadow:0 4px 0 var(--shadow);margin:-12px -6px 16px;padding:10px 12px 12px}
+.ctrl-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ctrl-top .brand svg{width:28px;height:28px}
+.ctrl-top .info{flex:1;min-width:0;font-weight:600;font-size:15px;line-height:1.25}
+.ctrl-top .info .tl{display:block;color:var(--muted);font-weight:500;font-size:13px}
+.iconbtn.sm{width:40px;height:40px;box-shadow:none}
+.iconbtn.sm svg{width:20px;height:20px}
+.stage{display:flex;align-items:center;gap:12px}
+.stageinfo{flex:1;min-width:0}
+.playbtn{width:66px;height:66px;border-radius:50%;border:3px solid var(--ink);background:var(--hot);color:var(--on-hot);display:grid;place-items:center;box-shadow:3px 3px 0 var(--shadow);cursor:pointer;flex:none;padding:0}
+.playbtn:active{transform:translate(3px,3px);box-shadow:none}
+.playbtn svg{width:32px;height:32px}
+@keyframes pulse{0%,100%{box-shadow:3px 3px 0 var(--shadow),0 0 0 0 var(--hot)}50%{box-shadow:3px 3px 0 var(--shadow),0 0 0 12px transparent}}
 .playbtn.need{animation:pulse 1.2s infinite}
-.secs{font-family:var(--display);font-size:46px;line-height:1}
-.secs small{font-family:var(--body);font-size:18px;font-weight:600;margin-inline-start:6px}
-.stagehint{color:var(--muted);font-weight:500;margin-top:4px}
-.dial{margin-top:18px;--p:0}
-.trk{position:relative;height:16px;border:2.5px solid var(--ink);border-radius:999px;background:var(--soft)}
-.fill{position:absolute;top:0;bottom:0;inset-inline-start:0;width:calc(var(--p) * 100%);background:var(--dial);border-radius:999px;transition:width .45s cubic-bezier(.3,1.4,.6,1)}
-.needle{position:absolute;top:-11px;width:6px;height:34px;margin-inline-start:-3px;inset-inline-start:calc(var(--p) * 100%);background:var(--hot);border:2px solid var(--ink);border-radius:3px;transition:inset-inline-start .45s cubic-bezier(.3,1.4,.6,1)}
-.stops{display:flex;justify-content:space-between;margin-top:10px;font-weight:600;font-size:15px;color:var(--muted)}
-.stops span.on{color:var(--ink)}
+.secs{font-family:var(--display);font-size:36px;line-height:1}
+.secs small{font-family:var(--body);font-size:16px;font-weight:600;margin-inline-start:5px}
+.stagehint{color:var(--muted);font-weight:500;font-size:14px;margin-top:3px;line-height:1.3}
+.dial{margin-top:14px;--p:0}
+.trk{position:relative;height:14px;border:2.5px solid var(--ink);border-radius:999px;background:var(--soft);margin:0 14px}
+.trk.tap{cursor:pointer}
+.fill{position:absolute;top:0;bottom:0;inset-inline-start:0;width:calc(var(--p) * 100%);background:var(--dial);border-radius:999px;transition:width .4s cubic-bezier(.3,1.4,.6,1)}
+.needle{position:absolute;top:-10px;width:6px;height:30px;margin-inline-start:-3px;inset-inline-start:calc(var(--p) * 100%);background:var(--ink);border-radius:3px;transition:inset-inline-start .4s cubic-bezier(.3,1.4,.6,1)}
+.stops{display:flex;justify-content:space-between;margin-top:6px}
+.stops button{background:none;border:0;font:600 15px var(--body);color:var(--muted);min-width:34px;min-height:36px;padding:4px 2px;border-radius:10px;cursor:pointer}
+.stops button.on{color:var(--ink)}
+.stops button.cur{background:var(--ink);color:var(--panel)}
+.stops button:disabled{cursor:default}
+.hintval{display:inline-block;margin-top:8px;background:var(--soft);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;font-weight:600}
+.ctrl-btns{display:flex;gap:8px;margin-top:10px}
+.ctrl-btns .btn{flex:1;min-height:46px;font-size:16px;padding:8px 10px;box-shadow:2px 2px 0 var(--shadow)}
+.waitline{margin:8px 0 0;text-align:center;color:var(--muted);font-weight:500;font-size:15px}
+.waitline:empty{display:none}
+.stats{list-style:none;margin:0;padding:0}
+.stats li{display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:2px dashed var(--soft);font-weight:500}
+.stats li:last-child{border-bottom:0}
+.stats .k{flex:1}
+.stats .pts{font-size:13px;color:var(--muted);font-weight:600;text-align:end}
+.stats .v{font-family:var(--display);font-size:22px;min-width:40px;text-align:end}
+.stats li.total{background:var(--soft);border-radius:12px;padding-inline:10px;border-bottom:0}
+.scoring{font-size:14px;color:var(--muted);margin:10px 0 0}
+.full{margin:0 0 8px}
+.full iframe{border:0;width:100%;border-radius:12px;display:block}
+.ytbox{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.ytbox iframe,.ytbox>div{position:absolute;inset:0;width:100%;height:100%;border:0}
+.fullnote{font-size:13px;color:var(--muted);margin:4px 0 6px}
+input[type=range]{width:100%;accent-color:var(--hot);min-height:36px}
 .slots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .slot{background:var(--panel);border:2.5px solid var(--ink);border-radius:18px;box-shadow:3px 3px 0 var(--shadow);padding:12px 14px;min-height:104px;display:flex;flex-direction:column}
 .slot .lb{font-size:14px;font-weight:600;color:var(--muted)}
@@ -205,7 +249,7 @@ textarea::placeholder{color:var(--muted);opacity:.85}
 
 /* dialog */
 dialog{border:2.5px solid var(--ink);border-radius:22px;background:var(--panel);color:var(--ink);padding:20px;width:min(92vw,440px);box-shadow:6px 6px 0 var(--shadow)}
-dialog::backdrop{background:rgba(23,21,59,.55)}
+dialog::backdrop{background:rgba(27,23,32,.6)}
 dialog h2{margin-bottom:16px}
 .seg{display:flex;flex-wrap:wrap;gap:8px}
 .seg button{flex:1 1 auto;min-height:46px;padding:8px 14px;border:2.5px solid var(--ink);border-radius:999px;background:var(--panel);color:var(--ink);font:600 16px var(--body);cursor:pointer}
@@ -219,7 +263,7 @@ dialog h2{margin-bottom:16px}
   <defs>
     <symbol id="i-bell" viewBox="0 0 64 64">
       <g class="bellsvg"><path d="M32 6c-1.7 0-3 1.3-3 3v1.6C21.6 12.1 17 18.5 17 26.5V35l-5 6.8V44h40v-2.2L47 35v-8.5c0-8-4.6-14.4-12-15.9V9c0-1.7-1.3-3-3-3z" fill="currentColor"/>
-      <circle cx="32" cy="50.5" r="5" fill="var(--hot)" stroke="currentColor" stroke-width="2"/></g>
+      <circle cx="32" cy="50.5" r="5" style="fill:var(--clap,var(--hot))" stroke="currentColor" stroke-width="2"/></g>
     </symbol>
     <symbol id="i-bell-off" viewBox="0 0 64 64">
       <path d="M32 6c-1.7 0-3 1.3-3 3v1.6C21.6 12.1 17 18.5 17 26.5V35l-5 6.8V44h40v-2.2L47 35v-8.5c0-8-4.6-14.4-12-15.9V9c0-1.7-1.3-3-3-3z" fill="currentColor" opacity=".35"/>
@@ -230,6 +274,9 @@ dialog h2{margin-bottom:16px}
       <circle cx="16" cy="7" r="2.6" fill="none" stroke="currentColor" stroke-width="2.4"/>
       <circle cx="8" cy="17" r="2.6" fill="none" stroke="currentColor" stroke-width="2.4"/>
     </symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M12.5 3h2.2c.3 2.6 4.3 3.6 4.3 7.7-1.2-1.6-2.6-2.5-4.3-2.6v9.1a3.6 3.1 0 1 1-2.2-2.9z" fill="currentColor"/></symbol>
+    <symbol id="i-note2" viewBox="0 0 24 24"><path d="M8.2 6.2 19.5 3v12.6a3.2 2.8 0 1 1-2.1-2.6V8l-7.1 2v7.6a3.2 2.8 0 1 1-2.1-2.6z" fill="currentColor"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 4.5v15l12-7.5z" fill="currentColor"/></symbol>
     <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4.2" height="14" rx="1" fill="currentColor"/><rect x="13.8" y="5" width="4.2" height="14" rx="1" fill="currentColor"/></symbol>
     <symbol id="i-replay" viewBox="0 0 24 24"><path d="M12 5V1.5L6.5 6 12 10.5V7a5.5 5.5 0 1 1-5.5 5.5H4.2A7.8 7.8 0 1 0 12 5z" fill="currentColor"/></symbol>
@@ -245,7 +292,15 @@ dialog h2{margin-bottom:16px}
     <div class="tools"><button class="iconbtn" data-act="settings" data-ta="settings"><svg><use href="#i-gear"/></svg></button></div>
   </div>
   <div class="hero">
-    <svg class="bigbell ring" id="hero-bell" aria-hidden="true"><use href="#i-bell"/></svg>
+    <div class="heroart" aria-hidden="true">
+      <div class="staff"></div>
+      <svg class="note n1"><use href="#i-note"/></svg>
+      <svg class="note n2"><use href="#i-note2"/></svg>
+      <svg class="note n3"><use href="#i-note"/></svg>
+      <svg class="note n4"><use href="#i-note2"/></svg>
+      <svg class="bigbell ring" id="hero-bell"><use href="#i-bell"/></svg>
+      <div class="eq"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
     <h1 class="logo">Rings a Bell</h1>
     <p class="tag" data-t="tagline"></p>
   </div>
@@ -317,6 +372,14 @@ dialog h2{margin-bottom:16px}
       <span class="num"><input type="number" id="end-min" value="30" min="1" max="600" inputmode="numeric"><span data-t="minutesUnit"></span></span></label>
     <label class="opt" style="margin-bottom:0"><input type="radio" name="endmode" value="manual"><span class="ol" data-t="endManual"></span></label>
   </div>
+  <div class="card">
+    <h3 data-t="modeTitle"></h3>
+    <label class="opt"><input type="radio" name="gmode" value="compete" checked><span class="ol" data-t="modeCompete"></span></label>
+    <label class="opt"><input type="radio" name="gmode" value="together"><span class="ol" data-t="modeTogether"></span></label>
+    <h3 data-t="soundTitle" style="margin-top:18px"></h3>
+    <label class="opt"><input type="radio" name="soundwhere" value="all" checked><span class="ol" data-t="soundAll"></span></label>
+    <label class="opt" style="margin-bottom:0"><input type="radio" name="soundwhere" value="host"><span class="ol" data-t="soundHost"></span></label>
+  </div>
   <button class="btn primary block" id="setup-save"></button>
 </section>
 
@@ -349,47 +412,49 @@ dialog h2{margin-bottom:16px}
 
 <!-- GAME -->
 <section class="screen" id="s-game">
-  <div class="top">
-    <div class="brand"><svg aria-hidden="true" id="game-bell"><use href="#i-bell"/></svg><span class="rc" id="game-code"></span></div>
-    <div class="tools">
-      <button class="iconbtn" data-act="sound"></button>
-      <button class="iconbtn" data-act="settings" data-ta="settings"><svg><use href="#i-gear"/></svg></button>
+  <div class="ctrl" id="g-ctrl">
+    <div class="ctrl-top">
+      <div class="brand"><svg aria-hidden="true" id="game-bell"><use href="#i-bell"/></svg><span class="rc" id="game-code"></span></div>
+      <div class="info"><span id="g-round"></span><span class="tl" id="g-time"></span></div>
+      <button class="iconbtn sm" data-act="sound"></button>
+      <button class="iconbtn sm" data-act="settings" data-ta="settings"><svg><use href="#i-gear"/></svg></button>
     </div>
-  </div>
-  <div class="roundline"><span id="g-round"></span><span class="tl" id="g-time"></span></div>
-  <div class="card">
     <div class="stage">
-      <button class="playbtn" id="g-play"><svg><use href="#i-replay"/></svg></button>
-      <div>
+      <button class="playbtn" id="g-play"></button>
+      <div class="stageinfo">
         <div class="secs" id="g-secs"></div>
         <div class="stagehint" id="g-hint"></div>
       </div>
+      <button class="btn small hidden" id="g-hintbtn" data-host="hint" data-t="hintBtn"></button>
     </div>
     <div class="dial" id="g-dial">
-      <div class="trk"><div class="fill"></div><div class="needle"></div></div>
+      <div class="trk" id="g-trk"><div class="fill"></div><div class="needle"></div></div>
       <div class="stops" id="g-stops"></div>
     </div>
+    <div class="center"><span class="hintval hidden" id="g-hintval"></span></div>
+    <div class="ctrl-btns hidden" id="g-btns"></div>
+    <p class="waitline" id="g-wait"></p>
   </div>
   <div class="slots">
-    <div class="slot" id="slot-artist"><div class="lb" data-t="artist"></div><div class="val"></div><div class="by"></div></div>
-    <div class="slot" id="slot-title"><div class="lb" data-t="title"></div><div class="val"></div><div class="by"></div></div>
+    <div class="slot" id="slot-title"><div class="lb" data-t="titleMain"></div><div class="val"></div><div class="by"></div></div>
+    <div class="slot" id="slot-artist"><div class="lb" data-t="artistBonus"></div><div class="val"></div><div class="by"></div></div>
   </div>
   <div class="card" id="g-guess">
     <div class="field ac">
-      <label class="lab" for="in-artist" data-t="artist"></label>
-      <div class="row">
-        <input id="in-artist" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" data-tp="guessArtistPh">
-        <button class="btn small" data-guess="artist" data-t="guess"></button>
-      </div>
-      <ul class="ac-list" id="ac-artist" hidden></ul>
-    </div>
-    <div class="field ac" style="margin-bottom:0">
-      <label class="lab" for="in-title" data-t="title"></label>
+      <label class="lab" for="in-title" data-t="titleMain"></label>
       <div class="row">
         <input id="in-title" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" data-tp="guessTitlePh">
         <button class="btn small" data-guess="title" data-t="guess"></button>
       </div>
       <ul class="ac-list" id="ac-title" hidden></ul>
+    </div>
+    <div class="field ac" style="margin-bottom:0">
+      <label class="lab" for="in-artist" data-t="artistBonus"></label>
+      <div class="row">
+        <input id="in-artist" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" data-tp="guessArtistPh">
+        <button class="btn small" data-guess="artist" data-t="guess"></button>
+      </div>
+      <ul class="ac-list" id="ac-artist" hidden></ul>
     </div>
   </div>
   <div class="card hidden" id="g-reveal">
@@ -398,19 +463,21 @@ dialog h2{margin-bottom:16px}
       <img id="g-cover" alt="">
       <div><div class="rtitle" id="g-rtitle"></div><div class="rartist" id="g-rartist"></div></div>
     </div>
-    <a class="btn go block" id="g-listen" target="_blank" rel="noopener"></a>
+    <div class="full" id="g-full"></div>
+    <p class="fullnote hidden" id="g-fullnote"></p>
+    <a class="link" id="g-listen" target="_blank" rel="noopener"></a>
   </div>
-  <p class="hint" id="g-wait"></p>
   <div class="card">
+    <h3 data-t="stats"></h3>
+    <ul class="stats" id="g-stats"></ul>
+    <p class="scoring" data-t="scoringNote"></p>
+  </div>
+  <div class="card" id="g-scorecard">
     <h3 data-t="scores"></h3>
     <ol class="board" id="g-board"></ol>
   </div>
   <button class="btn block" data-act="addsong" data-t="addSongBtn" style="margin-bottom:16px"></button>
   <div class="center hidden" id="g-endwrap"><button class="link" id="g-end" data-t="endGame"></button></div>
-  <div class="hostbar hidden" id="g-bar">
-    <div class="hostcap" data-t="hostControls"></div>
-    <div class="inner" id="g-bar-inner"></div>
-  </div>
 </section>
 
 <!-- END -->
@@ -424,7 +491,8 @@ dialog h2{margin-bottom:16px}
     <h2 data-t="gameOver"></h2>
     <p class="winner" id="e-winner"></p>
   </div>
-  <div class="card"><ol class="board big" id="e-board"></ol></div>
+  <div class="card"><h3 data-t="stats"></h3><ul class="stats" id="e-stats"></ul></div>
+  <div class="card" id="e-boardcard"><ol class="board big" id="e-board"></ol></div>
   <p class="hint" id="e-wait" data-t="waitHost"></p>
   <button class="btn block" id="btn-leave-end" data-t="leave"></button>
   <div class="hostbar hidden" id="e-bar"><div class="inner">
@@ -532,6 +600,10 @@ dialog h2{margin-bottom:16px}
     <span class="lab" data-t="musicApp"></span>
     <div class="seg" id="app-seg"></div>
   </div>
+  <div class="field">
+    <label class="lab" for="vol" data-t="volume"></label>
+    <input type="range" id="vol" min="0" max="100" step="5">
+  </div>
   <div class="stack">
     <button class="btn block hidden" id="dlg-leave" data-t="leave"></button>
     <button class="btn primary block" id="dlg-close" data-t="close"></button>
@@ -627,7 +699,7 @@ const STR = {
     artist: "Artist", title: "Song",
     guessArtistPh: "Who's singing?", guessTitlePh: "What's the song?", guess: "Guess",
     nope: "Not this one, try again", tooLate: "Someone beat you to it!",
-    gotArtist: "{name} named the artist! +1", gotTitle: "{name} named the song! +1", gotBoth: "{name} got both! 3 points",
+    gotArtist: "{name} named the artist! +1 bonus", gotTitle: "{name} named the song! +2",
     namedBy: "by {name}",
     revealFound: "Got it!", revealGaveUp: "The answer was",
     listenFull: "Full song on {app}",
@@ -641,6 +713,20 @@ const STR = {
     playAgain: "Play again", newMusic: "Change the music", leave: "Leave room",
     settings: "Settings", language: "Language", musicApp: "Open full songs in", close: "Done",
     soundBtn: "Sound on this phone",
+    titleMain: "Song", artistBonus: "Artist (bonus)",
+    play: "Play", stop: "Stop", reveal: "Reveal the answer",
+    hintBtn: "Hint: year", hintYear: "Original release year: {y}", hintLoading: "Looking up the year…", noYear: "No year found for this song",
+    stats: "This game", stPlayed: "Songs played", stBoth: "Song and artist", stSong: "Song only", stArtist: "Artist only", stNone: "Nobody knew",
+    ptsN: "{n} pts", pt1: "1 pt", teamPts: "Team points", teamScore: "Team points: {n}",
+    scoringNote: "Song: 2 points. Artist: 1 bonus point.",
+    modeTitle: "How do you play?", modeCompete: "Competition: everyone scores for themselves", modeTogether: "Together: one team, no competition",
+    modeSumCompete: "Competition", modeSumTogether: "Playing together",
+    soundTitle: "Where does the music play?", soundAll: "On every phone", soundHost: "Only on the host's device",
+    soundHostHint: "The music plays on the host's device. Tap to hear it here too.",
+    otherTab: "The game is also open in another window here, so the music plays there. Tap to play here instead.",
+    volume: "Volume on this device",
+    fullLoading: "Loading the full song…", fullSpNote: "Plays the whole song if you're signed in to Spotify (free or Premium) in this browser. Otherwise you'll hear a preview.",
+    openIn: "Open in {app}", waitCtl: "Waiting for the host…",
     installApp: "Install the app on this phone", installed: "Installed! You'll find Rings a Bell on your home screen.",
     familyLists: "Family song lists", manageLists: "Create or edit family lists",
     libTitle: "Family lists", libIntro: "Lists saved here are shared with everyone who plays.",
@@ -715,7 +801,7 @@ const STR = {
     artist: "מבצע", title: "שיר",
     guessArtistPh: "מי שר?", guessTitlePh: "איזה שיר?", guess: "ניחוש",
     nope: "לא זה, נסו שוב", tooLate: "מישהו הקדים אותך!",
-    gotArtist: "המבצע זוהה! נקודה ל{name}", gotTitle: "השיר זוהה! נקודה ל{name}", gotBoth: "זיהוי מלא! 3 נקודות ל{name}",
+    gotArtist: "המבצע זוהה! נקודת בונוס ל{name}", gotTitle: "השיר זוהה! 2 נקודות ל{name}",
     namedBy: "על ידי {name}",
     revealFound: "זוהה!", revealGaveUp: "התשובה הייתה",
     listenFull: "השיר המלא ב{app}",
@@ -729,6 +815,20 @@ const STR = {
     playAgain: "משחק נוסף", newMusic: "החלפת מוזיקה", leave: "יציאה מהחדר",
     settings: "הגדרות", language: "שפה", musicApp: "פתיחת שירים מלאים ב:", close: "סיום",
     soundBtn: "צליל בטלפון הזה",
+    titleMain: "שם השיר", artistBonus: "מבצע (בונוס)",
+    play: "ניגון", stop: "עצירה", reveal: "חשיפת התשובה",
+    hintBtn: "רמז: שנה", hintYear: "שנת יציאה מקורית: {y}", hintLoading: "מחפש את השנה…", noYear: "לא נמצאה שנה לשיר הזה",
+    stats: "המשחק הזה", stPlayed: "שירים שהושמעו", stBoth: "שיר ומבצע", stSong: "רק שיר", stArtist: "רק מבצע", stNone: "אף אחד לא ידע",
+    ptsN: "{n} נק׳", pt1: "1 נק׳", teamPts: "נקודות הקבוצה", teamScore: "נקודות הקבוצה: {n}",
+    scoringNote: "שיר: 2 נקודות. מבצע: נקודת בונוס.",
+    modeTitle: "איך משחקים?", modeCompete: "תחרות: כל אחד צובר נקודות לעצמו", modeTogether: "ביחד: קבוצה אחת, בלי תחרות",
+    modeSumCompete: "תחרות", modeSumTogether: "משחק משותף",
+    soundTitle: "איפה המוזיקה מתנגנת?", soundAll: "בכל טלפון", soundHost: "רק במכשיר של המנחה",
+    soundHostHint: "המוזיקה מתנגנת במכשיר של המנחה. אפשר להקיש כדי לשמוע גם כאן.",
+    otherTab: "המשחק פתוח גם בחלון נוסף במכשיר הזה, ולכן המוזיקה מתנגנת שם. אפשר להקיש כדי לנגן כאן.",
+    volume: "עוצמת הצליל במכשיר הזה",
+    fullLoading: "טוען את השיר המלא…", fullSpNote: "השיר המלא מתנגן אם מחוברים לספוטיפיי (חינמי או פרימיום) בדפדפן הזה. אחרת יתנגן קטע קצר.",
+    openIn: "פתיחה ב{app}", waitCtl: "מחכים למנחה…",
     installApp: "התקנת האפליקציה בטלפון", installed: "הותקן! Rings a Bell מחכה לך במסך הבית.",
     familyLists: "רשימות השירים המשפחתיות", manageLists: "יצירה ועריכה של רשימות משפחתיות",
     libTitle: "רשימות משפחתיות", libIntro: "הרשימות כאן משותפות לכל מי שמשחק.",
@@ -789,7 +889,8 @@ if (!me.pid) { me.pid = 'p' + Math.random().toString(36).slice(2, 10) + Date.now
 const prefs = {
   lang: LS.get('lang', (navigator.language || '').toLowerCase().startsWith('he') ? 'he' : 'en'),
   app: LS.get('app', 'spotify'),
-  sound: LS.get('sound', true)
+  sound: LS.get('sound', true),
+  vol: LS.get('vol', 1)
 };
 
 function t(k, v) {
@@ -879,25 +980,168 @@ function loadTrack(id) {
   return pr;
 }
 
+const userVol = () => clamp(prefs.vol == null ? 1 : +prefs.vol, 0, 1);
+let fadeT = null;
+function setVol(v) { try { P.audio.volume = clamp(v, 0, 1); } catch (e) {} }
+/* Short fades in and out, so a clip never starts or stops with a click. */
+function fadeTo(target, ms, done) {
+  clearInterval(fadeT); fadeT = null;
+  const a = P.audio, from = a.volume, t0 = performance.now();
+  if (ms <= 0) { setVol(target); if (done) done(); return; }
+  fadeT = setInterval(() => {
+    const k = Math.min(1, (performance.now() - t0) / ms);
+    setVol(from + (target - from) * k);
+    if (k >= 1) { clearInterval(fadeT); fadeT = null; if (done) done(); }
+  }, 16);
+}
+
 async function playClip(id, sec) {
   const token = ++P.token;
-  clearTimeout(P.stopT);
+  clearTimeout(P.stopT); clearInterval(fadeT);
   try { await loadTrack(id); } catch (e) { return; }
   if (token !== P.token || P.id !== id) return;
   const a = P.audio;
   a.pause();
   try { a.currentTime = 0; } catch (e) {}
+  setVol(0);
+  pauseFull();
   try {
     await a.play();
     P.needTap = false;
   } catch (e) {
+    setVol(userVol());
     P.needTap = true; updatePlayBtn(); updateStageHint(); return;
   }
-  if (token !== P.token) { a.pause(); return; }
+  if (token !== P.token) { a.pause(); setVol(userVol()); return; }
+  fadeTo(userVol(), sec && sec < 1 ? 25 : 60);
   updatePlayBtn(); updateStageHint();
-  if (sec) P.stopT = setTimeout(() => { if (token === P.token) a.pause(); }, sec * 1000);
+  if (sec) {
+    const ms = sec * 1000, out = Math.min(150, ms * 0.25);
+    P.stopT = setTimeout(() => {
+      if (token !== P.token) return;
+      fadeTo(0, out, () => { if (token === P.token) { a.pause(); setVol(userVol()); } });
+    }, ms - out);
+  }
 }
-function stopAudio() { P.token++; clearTimeout(P.stopT); try { P.audio.pause(); } catch (e) {} }
+function stopAudio() {
+  P.token++; clearTimeout(P.stopT); clearInterval(fadeT); fadeT = null;
+  try { P.audio.pause(); } catch (e) {}
+  setVol(userVol());
+}
+
+/* If the game is open twice on one device (a tab and the installed app, say),
+   only the most recently opened or tapped window plays, so nothing sounds doubled. */
+const TAB_ID = Math.random().toString(36).slice(2);
+let bcast = null;
+try { bcast = new BroadcastChannel('rings-a-bell'); } catch (e) {}
+function claimTab() {
+  P.yielded = false;
+  if (bcast && S.code) { try { bcast.postMessage({ type: 'claim', code: S.code, tab: TAB_ID }); } catch (e) {} }
+}
+if (bcast) bcast.onmessage = e => {
+  const m = e.data || {};
+  if (m.type === 'claim' && m.tab !== TAB_ID && m.code && m.code === S.code && !P.yielded) {
+    P.yielded = true; stopAudio(); pauseFull(); updateStageHint();
+  }
+};
+
+/* ---------- Full song inside the game (official embedded players) ---------- */
+const FULL = { cache: {}, key: null, kind: null, ctrl: null, sp: null, yt: null, quietUntil: 0 };
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const el = document.createElement('script');
+    el.src = src; el.async = true;
+    el.onload = () => res(); el.onerror = () => rej(new Error('script'));
+    document.head.appendChild(el);
+  });
+}
+function spotifyApi() {
+  if (!FULL.sp) FULL.sp = new Promise(res => {
+    window.onSpotifyIframeApiReady = api => res(api);
+    loadScript('https://open.spotify.com/embed/iframe-api/v1').catch(() => res(null));
+    setTimeout(() => res(null), 10000);
+  });
+  return FULL.sp;
+}
+function ytApi() {
+  if (!FULL.yt) FULL.yt = new Promise(res => {
+    if (window.YT && window.YT.Player) return res(window.YT);
+    window.onYouTubeIframeAPIReady = () => res(window.YT);
+    loadScript('https://www.youtube.com/iframe_api').catch(() => res(null));
+    setTimeout(() => res(null), 10000);
+  });
+  return FULL.yt;
+}
+/* Finds the same song on Spotify and YouTube (song.link matches it by the Deezer track). */
+async function findLinks(id) {
+  if (FULL.cache[id]) return FULL.cache[id];
+  let out = {};
+  try {
+    const r = await fetch('https://api.song.link/v1-alpha.1/links?userCountry=IL&url=' + encodeURIComponent('https://www.deezer.com/track/' + id));
+    if (r.ok) {
+      const j = await r.json(), L = j.linksByPlatform || {};
+      const sp = ((L.spotify && L.spotify.url) || '').match(/track\/([A-Za-z0-9]{10,})/);
+      const yu = (L.youtube && L.youtube.url) || (L.youtubeMusic && L.youtubeMusic.url) || '';
+      const yt = yu.match(/[?&]v=([\w-]{11})/);
+      out = { sp: sp && sp[1], yt: yt && yt[1] };
+      FULL.cache[id] = out;
+    }
+  } catch (e) {}
+  return out;
+}
+function clearFull() {
+  try { if (FULL.ctrl && FULL.ctrl.destroy) FULL.ctrl.destroy(); } catch (e) {}
+  FULL.ctrl = null; FULL.kind = null; FULL.key = null;
+  const box = $('#g-full'); if (box) box.innerHTML = '';
+  const n = $('#g-fullnote'); if (n) n.classList.add('hidden');
+}
+function pauseFull() {
+  FULL.quietUntil = performance.now() + 900;
+  try {
+    if (!FULL.ctrl) return;
+    if (FULL.kind === 'sp') FULL.ctrl.pause();
+    else if (FULL.kind === 'yt' && FULL.ctrl.pauseVideo) FULL.ctrl.pauseVideo();
+  } catch (e) {}
+}
+function fullStarted() { if (performance.now() > FULL.quietUntil) stopAudio(); }
+async function showFull(tr) {
+  const app = prefs.app, key = tr.id + '|' + app;
+  if (FULL.key === key) return;
+  clearFull(); FULL.key = key;
+  if (!['spotify', 'youtube', 'ytmusic'].includes(app)) return;
+  const box = $('#g-full');
+  box.innerHTML = `<p class="fullnote">${esc(t('fullLoading'))}</p>`;
+  const links = await findLinks(tr.id);
+  if (FULL.key !== key) return;
+  box.innerHTML = '';
+  if (app === 'spotify' && links.sp) {
+    const el = document.createElement('div'); box.appendChild(el);
+    const n = $('#g-fullnote'); n.textContent = t('fullSpNote'); n.classList.remove('hidden');
+    const api = await spotifyApi();
+    if (FULL.key !== key) return;
+    if (api && api.createController) {
+      api.createController(el, { uri: 'spotify:track:' + links.sp, width: '100%', height: 152 }, ctrl => {
+        if (FULL.key !== key) { try { ctrl.destroy(); } catch (e) {} return; }
+        FULL.ctrl = ctrl; FULL.kind = 'sp';
+        ctrl.addListener('playback_update', ev => { const d = ev && ev.data; if (d && !d.isPaused && !d.isBuffering) fullStarted(); });
+      });
+    } else {
+      el.outerHTML = `<iframe src="https://open.spotify.com/embed/track/${esc(links.sp)}" height="152" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
+    }
+  } else if ((app === 'youtube' || app === 'ytmusic') && links.yt) {
+    const wrap = document.createElement('div'); wrap.className = 'ytbox';
+    const el = document.createElement('div'); wrap.appendChild(el); box.appendChild(wrap);
+    const YT = await ytApi();
+    if (FULL.key !== key) return;
+    if (YT && YT.Player) {
+      FULL.kind = 'yt';
+      FULL.ctrl = new YT.Player(el, { videoId: links.yt, width: '100%', height: '100%', playerVars: { playsinline: 1, rel: 0 },
+        events: { onStateChange: ev => { if (ev.data === 1) fullStarted(); } } });
+    } else {
+      el.outerHTML = `<iframe src="https://www.youtube.com/embed/${esc(links.yt)}?playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+    }
+  }
+}
 
 let actx = null;
 function unlockAudio() {
@@ -1002,6 +1246,7 @@ function enterRoom(code) {
   LS.set('last', code);
   try { history.replaceState(null, '', location.pathname + '?room=' + code); } catch (e) {}
   $('#game-code').textContent = code;
+  claimTab();
   const pref = db.ref(`rooms/${code}/players/${me.pid}`);
   S.connRef = db.ref('.info/connected');
   S.connCb = S.connRef.on('value', s => {
@@ -1047,7 +1292,7 @@ function onRoom(room) {
   renderCurrent();
   watchPlays();
   if (room.status === 'playing') handleAudio();
-  else { stopAudio(); S.lastKey = null; }
+  else { stopAudio(); S.lastKey = null; if (FULL.key) clearFull(); }
 }
 
 function renderCurrent() {
@@ -1073,14 +1318,17 @@ function playerName(id) {
   return p ? p.name : '?';
 }
 
+const isTogether = () => !!(S.room && S.room.settings && S.room.settings.mode === 'together');
+const canControl = () => !!(S.room && (S.isHost || isTogether()));
+const hostOnlySound = () => !!(S.room && S.room.settings && S.room.settings.soundWhere === 'host' && !S.isHost);
+
 function notify(room) {
   const r = room.round, p = S.prevRound;
   if (!r || !p || r.num !== p.num || room.status !== 'playing') return;
   const newA = r.artistBy && !p.artistBy, newT = r.titleBy && !p.titleBy;
   if (!newA && !newT) return;
   const who = newT ? r.titleBy : r.artistBy;
-  const both = r.artistBy && r.artistBy === r.titleBy && who === r.artistBy;
-  const msg = both ? t('gotBoth', { name: playerName(who) }) : newT ? t('gotTitle', { name: playerName(who) }) : t('gotArtist', { name: playerName(who) });
+  const msg = newT ? t('gotTitle', { name: playerName(who) }) : t('gotArtist', { name: playerName(who) });
   toast(msg, true);
   ding();
   ring($('#game-bell'));
@@ -1093,7 +1341,7 @@ function handleAudio() {
   const key = r.num + '|' + r.level + '|' + r.state;
   if (key === S.lastKey) return;
   S.lastKey = key;
-  if (!prefs.sound) { loadTrack(tr.id).catch(() => {}); return; }
+  if (!prefs.sound || P.yielded || hostOnlySound()) { loadTrack(tr.id).catch(() => {}); updateStageHint(); return; }
   playClip(tr.id, r.state === 'guessing' ? SLICES[r.level || 0] : null);
 }
 
@@ -1105,9 +1353,10 @@ function sortedPlayers() {
 
 function settingsSummary() {
   const st = S.room.settings || {};
-  if (st.endMode === 'songs') return t('endsSongs', { n: st.endValue });
-  if (st.endMode === 'time') return t('endsTime', { n: st.endValue });
-  return t('endsManual');
+  const mode = st.mode === 'together' ? t('modeSumTogether') : t('modeSumCompete');
+  if (st.endMode === 'songs') return mode + ' / ' + t('endsSongs', { n: st.endValue });
+  if (st.endMode === 'time') return mode + ' / ' + t('endsTime', { n: st.endValue });
+  return mode + ' / ' + t('endsManual');
 }
 
 function renderLobby() {
@@ -1149,12 +1398,13 @@ function timeLabel() {
 function renderGame() {
   const room = S.room, r = room.round, tr = curTrack();
   if (!r || !tr) return;
-  const revealed = r.state === 'revealed';
+  const revealed = r.state === 'revealed', ctl = canControl();
 
   if (S.renderedNum !== r.num) {
-    S.renderedNum = r.num;
+    S.renderedNum = r.num; S.hintBusy = false;
     $('#in-artist').value = ''; $('#in-title').value = '';
     $('#ac-artist').hidden = true; $('#ac-title').hidden = true;
+    if (FULL.key) clearFull();
   }
 
   $('#g-round').textContent = roundLabel();
@@ -1162,11 +1412,21 @@ function renderGame() {
 
   const lvl = revealed ? MAX_LEVEL : (r.level || 0);
   $('#g-dial').style.setProperty('--p', String(lvl / MAX_LEVEL));
-  $('#g-stops').innerHTML = SLICES.map((s, i) => `<span class="${i <= lvl ? 'on' : ''}">${secLabel(s)}</span>`).join('');
+  const tappable = ctl && !revealed;
+  $('#g-trk').classList.toggle('tap', tappable);
+  $('#g-stops').innerHTML = SLICES.map((sec, i) =>
+    `<button type="button" data-level="${i}" class="${i <= lvl ? 'on' : ''} ${i === lvl && !revealed ? 'cur' : ''}" ${tappable ? '' : 'disabled'}
+      aria-label="${esc(secLabel(sec) + ' ' + t('secUnit'))}">${secLabel(sec)}</button>`).join('');
   $('#g-secs').innerHTML = `${secLabel(SLICES[lvl])}<small>${esc(t('secUnit'))}</small>`;
 
-  slot('#slot-artist', r.artistBy, tr.a, revealed);
+  const hv = $('#g-hintval');
+  if (r.hint) { hv.textContent = r.hint > 0 ? t('hintYear', { y: r.hint }) : t('noYear'); hv.classList.remove('hidden'); }
+  else if (S.hintBusy) { hv.textContent = t('hintLoading'); hv.classList.remove('hidden'); }
+  else hv.classList.add('hidden');
+  $('#g-hintbtn').classList.toggle('hidden', !(ctl && !revealed && !r.hint && !S.hintBusy));
+
   slot('#slot-title', r.titleBy, tr.t, revealed);
+  slot('#slot-artist', r.artistBy, tr.a, revealed);
 
   $('#g-guess').classList.toggle('hidden', revealed);
   $('#in-artist').disabled = !!r.artistBy;
@@ -1177,22 +1437,24 @@ function renderGame() {
   renderReveal();
   updatePlayBtn(); updateStageHint();
 
-  $('#g-wait').textContent = (revealed && !S.isHost) ? t('waitNext') : '';
-  renderBoard('#g-board', false);
-
-  $('#g-bar').classList.toggle('hidden', !S.isHost);
-  $('#g-endwrap').classList.toggle('hidden', !S.isHost);
-  if (S.isHost) {
-    const inner = $('#g-bar-inner');
-    const want = revealed ? 'rev' : 'g' + (r.level >= MAX_LEVEL ? 'max' : '');
-    if (inner.dataset.mode !== want || inner.dataset.lang !== prefs.lang) {
-      inner.dataset.mode = want; inner.dataset.lang = prefs.lang;
-      inner.innerHTML = revealed
+  const btns = $('#g-btns');
+  btns.classList.toggle('hidden', !ctl);
+  if (ctl) {
+    const want = [revealed ? 'rev' : 'g', r.titleBy ? 't' : '', lvl >= MAX_LEVEL ? 'max' : '', prefs.lang].join('|');
+    if (btns.dataset.mode !== want) {
+      btns.dataset.mode = want;
+      btns.innerHTML = revealed
         ? `<button class="btn primary" data-host="next">${esc(t('nextSong'))}</button>`
-        : `<button class="btn" data-host="more" ${r.level >= MAX_LEVEL ? 'disabled' : ''}>${esc(t('addSlice'))}</button>
-           <button class="btn primary" data-host="giveup">${esc(t('giveUp'))}</button>`;
+        : `<button class="btn" data-host="more" ${lvl >= MAX_LEVEL ? 'disabled' : ''}>${esc(t('addSlice'))}</button>
+           <button class="btn primary" data-host="giveup">${esc(r.titleBy ? t('reveal') : t('giveUp'))}</button>`;
     }
   }
+  $('#g-wait').textContent = ctl ? '' : (revealed ? t('waitNext') : '');
+
+  renderStats('#g-stats');
+  $('#g-scorecard').classList.toggle('hidden', isTogether());
+  if (!isTogether()) renderBoard('#g-board', false);
+  $('#g-endwrap').classList.toggle('hidden', !ctl);
 }
 
 function slot(sel, by, value, revealed) {
@@ -1210,8 +1472,7 @@ function renderReveal() {
   const revealed = r.state === 'revealed';
   $('#g-reveal').classList.toggle('hidden', !revealed);
   if (!revealed || !tr) return;
-  const full = r.artistBy && r.titleBy;
-  $('#g-rhead').textContent = full ? t('revealFound') : t('revealGaveUp');
+  $('#g-rhead').textContent = r.titleBy ? t('revealFound') : t('revealGaveUp');
   $('#g-rtitle').textContent = tr.t;
   $('#g-rartist').textContent = tr.a;
   const cover = P.meta && P.meta.id === tr.id && P.meta.album ? (P.meta.album.cover_medium || P.meta.album.cover || '') : '';
@@ -1220,19 +1481,15 @@ function renderReveal() {
   else img.classList.add('hidden');
   const a = $('#g-listen');
   a.href = (APPS[prefs.app] || APPS.spotify).url(tr);
-  a.textContent = t('listenFull', { app: appName(prefs.app) });
+  a.textContent = t('openIn', { app: appName(prefs.app) });
+  showFull(tr);
 }
 
 function updatePlayBtn() {
   const btn = $('#g-play'); if (!btn) return;
-  const r = S.room && S.room.round;
-  const revealed = r && r.state === 'revealed';
-  let icon = 'i-replay';
-  if (revealed) icon = P.playing ? 'i-pause' : 'i-play';
-  else if (P.needTap) icon = 'i-play';
-  btn.innerHTML = `<svg><use href="#${icon}"/></svg>`;
+  btn.innerHTML = `<svg><use href="#${P.playing ? 'i-stop' : 'i-play'}"/></svg>`;
   btn.classList.toggle('need', P.needTap);
-  btn.setAttribute('aria-label', revealed ? (P.playing ? 'Pause' : 'Play') : t('tapReplay'));
+  btn.setAttribute('aria-label', P.playing ? t('stop') : t('play'));
 }
 
 function updateStageHint() {
@@ -1241,10 +1498,39 @@ function updateStageHint() {
   let h = '';
   if (P.err) h = t('noPreview');
   else if (P.loading) h = t('loadingSong');
+  else if (P.yielded && !P.playing) h = t('otherTab');
   else if (P.needTap) h = t('tapToPlay');
   else if (!prefs.sound) h = t('soundOff');
+  else if (hostOnlySound() && !P.playing) h = t('soundHostHint');
   else if (r && r.state === 'guessing') h = t('tapReplay');
   el.textContent = h;
+}
+
+/* ---------- Live statistics ---------- */
+const roundResult = r => ({ a: !!r.artistBy, t: !!r.titleBy });
+function computeStats(room) {
+  const res = {}, R = room.results;
+  if (R) Object.keys(R).forEach(k => { if (R[k]) res[k] = R[k]; });
+  const r = room.round;
+  if (r && room.status === 'playing' && r.state === 'revealed' && !res[r.num]) res[r.num] = roundResult(r);
+  const st = { played: 0, both: 0, song: 0, artist: 0, none: 0 };
+  Object.values(res).forEach(x => {
+    st.played++;
+    if (x.a && x.t) st.both++; else if (x.t) st.song++; else if (x.a) st.artist++; else st.none++;
+  });
+  st.points = st.both * 3 + st.song * 2 + st.artist;
+  return st;
+}
+function renderStats(sel) {
+  const st = computeStats(S.room);
+  const row = (k, v, pts, cls) => `<li class="${cls || ''}"><span class="k">${esc(k)}</span><span class="pts">${esc(pts || '')}</span><span class="v">${v}</span></li>`;
+  let html = row(t('stPlayed'), st.played)
+    + row(t('stBoth'), st.both, t('ptsN', { n: 3 }))
+    + row(t('stSong'), st.song, t('ptsN', { n: 2 }))
+    + row(t('stArtist'), st.artist, t('pt1'))
+    + row(t('stNone'), st.none, t('ptsN', { n: 0 }));
+  if (isTogether()) html += row(t('teamPts'), st.points, '', 'total');
+  $(sel).innerHTML = html;
 }
 
 function renderBoard(sel, big) {
@@ -1306,14 +1592,12 @@ async function submitGuess(kind) {
     return;
   }
   const field = kind === 'artist' ? 'artistBy' : 'titleBy';
-  const other = kind === 'artist' ? 'titleBy' : 'artistBy';
   const num = r.num;
-  let pts = 0;
+  const pts = kind === 'title' ? 2 : 1;
   try {
     const res = await S.ref.child('round').transaction(cur => {
       if (!cur || cur.num !== num || cur.state !== 'guessing' || cur[field]) return;
       cur[field] = me.pid;
-      pts = cur[other] === me.pid ? 2 : 1;
       if (cur.artistBy && cur.titleBy) cur.state = 'revealed';
       return cur;
     });
@@ -1359,7 +1643,7 @@ function pickIndex(played) {
 async function startGame() {
   const idx = pickIndex(null);
   if (idx < 0) return;
-  const up = { status: 'playing', startedAt: SV, played: { [idx]: true }, round: { num: 1, idx, level: 0, state: 'guessing' } };
+  const up = { status: 'playing', startedAt: SV, played: { [idx]: true }, results: null, round: { num: 1, idx, level: 0, state: 'guessing' } };
   sortedPlayers().forEach(p => { up['players/' + p.id + '/score'] = 0; });
   try { await S.ref.update(up); markPlayed(idx); } catch (e) { toast(t('netErr')); }
 }
@@ -1367,6 +1651,9 @@ async function startGame() {
 async function nextSong() {
   const room = S.room, st = room.settings || {}, r = room.round;
   const num = r ? r.num : 0;
+  if (r && !(room.results && room.results[num])) {
+    try { await S.ref.child('results/' + num).set(roundResult(r)); } catch (e) {}
+  }
   if (st.endMode === 'songs' && num >= st.endValue) return endGame();
   if (st.endMode === 'time' && room.startedAt && now() - room.startedAt >= st.endValue * 60000) return endGame();
   const idx = pickIndex(room.played);
@@ -1378,13 +1665,57 @@ async function nextSong() {
 }
 
 async function endGame() {
-  try { await S.ref.update({ status: 'ended' }); } catch (e) { toast(t('netErr')); }
+  const room = S.room, r = room && room.round, up = { status: 'ended' };
+  if (r && room.status === 'playing' && !(room.results && room.results[r.num]) && (r.state === 'revealed' || r.artistBy || r.titleBy)) {
+    up['results/' + r.num] = roundResult(r);
+  }
+  try { await S.ref.update(up); } catch (e) { toast(t('netErr')); }
 }
 
-async function hostAction(act, btn) {
-  if (!S.isHost || !S.ref) return;
-  if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
-  if (act === 'more') {
+/* Year hint: the earliest release year among this artist's versions of the song,
+   so a greatest-hits album or a remaster doesn't give a late year. */
+async function findYear(tr) {
+  const years = [];
+  const add = d => { const y = parseInt(String((d && d.release_date) || '').slice(0, 4), 10); if (y > 1900 && y <= new Date().getFullYear()) years.push(y); };
+  try { add(P.meta && P.meta.id === tr.id ? P.meta : await dz('track/' + tr.id)); } catch (e) {}
+  let cands = [];
+  try {
+    const q = `artist:"${String(tr.a).replace(/"/g, '')}" track:"${cleanTitle(tr.t).replace(/"/g, '')}"`;
+    const r = await dz('search', { q, limit: 25 });
+    const want = norm(cleanTitle(tr.t)), wa = norm(firstArtist(tr.a));
+    cands = (r.data || []).filter(c => c && c.id !== tr.id && c.artist && norm(firstArtist(c.artist.name)) === wa
+      && norm(cleanTitle(c.title_short || c.title)) === want && !isCover(c)).slice(0, 8);
+  } catch (e) {}
+  await pool(cands, 3, async c => { try { add(await dz('track/' + c.id)); } catch (e) {} });
+  return years.length ? Math.min(...years) : null;
+}
+
+async function hostAction(act, btn, arg) {
+  if (!canControl() || !S.ref) return;
+  if (btn && act !== 'level') { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
+  if (act === 'level') {
+    const i = clamp(+arg || 0, 0, MAX_LEVEL), r = S.room.round, tr = curTrack();
+    if (!r || r.state !== 'guessing') return;
+    if ((r.level || 0) === i) { if (tr) { claimTab(); unlockAudio(); playClip(tr.id, SLICES[i]); } return; }
+    S.ref.child('round').transaction(cur => {
+      if (!cur || cur.state !== 'guessing' || (cur.level || 0) === i) return;
+      cur.level = i; return cur;
+    });
+  } else if (act === 'hint') {
+    const r = S.room.round, tr = curTrack();
+    if (!r || !tr || r.hint || S.hintBusy) return;
+    const num = r.num;
+    S.hintBusy = true; renderGame();
+    const y = await findYear(tr);
+    S.hintBusy = false;
+    try {
+      await S.ref.child('round').transaction(cur => {
+        if (!cur || cur.num !== num || cur.hint) return;
+        cur.hint = y || -1; return cur;
+      });
+    } catch (e) { toast(t('netErr')); }
+    if (S.room && S.room.status === 'playing') renderGame();
+  } else if (act === 'more') {
     S.ref.child('round').transaction(r => {
       if (!r || r.state !== 'guessing' || (r.level || 0) >= MAX_LEVEL) return;
       r.level = (r.level || 0) + 1; return r;
@@ -1401,15 +1732,22 @@ async function hostAction(act, btn) {
 
 /* ---------- End ---------- */
 function renderEnd() {
-  renderBoard('#e-board', true);
-  const ps = sortedPlayers();
-  const top = Math.max(0, ...ps.map(p => p.score || 0));
-  const winners = ps.filter(p => (p.score || 0) === top);
-  $('#e-winner').textContent = !ps.length ? '' : winners.length === 1
-    ? t('winner', { name: winners[0].name })
-    : t('tie', { names: winners.map(w => w.name).join(', ') });
-  $('#e-bar').classList.toggle('hidden', !S.isHost);
-  $('#e-wait').classList.toggle('hidden', S.isHost);
+  renderStats('#e-stats');
+  const together = isTogether();
+  $('#e-boardcard').classList.toggle('hidden', together);
+  if (together) {
+    $('#e-winner').textContent = t('teamScore', { n: computeStats(S.room).points });
+  } else {
+    renderBoard('#e-board', true);
+    const ps = sortedPlayers();
+    const top = Math.max(0, ...ps.map(p => p.score || 0));
+    const winners = ps.filter(p => (p.score || 0) === top);
+    $('#e-winner').textContent = !ps.length ? '' : winners.length === 1
+      ? t('winner', { name: winners[0].name })
+      : t('tie', { names: winners.map(w => w.name).join(', ') });
+  }
+  $('#e-bar').classList.toggle('hidden', !canControl());
+  $('#e-wait').classList.toggle('hidden', canControl());
   if (!S.endRung) { S.endRung = true; ring($('#end-bell')); }
 }
 
@@ -1427,14 +1765,24 @@ function openSetup(mode) {
     if (radio) radio.checked = true;
     if (st.endMode === 'songs') $('#end-songs').value = st.endValue;
     if (st.endMode === 'time') $('#end-min').value = st.endValue;
+    setRadio('gmode', st.mode || 'compete');
+    setRadio('soundwhere', st.soundWhere || 'all');
   } else {
     S.pl = null;
+    setRadio('gmode', LS.get('gmode', 'compete'));
+    setRadio('soundwhere', LS.get('soundwhere', 'all'));
   }
   renderPicked();
   renderSetupLists();
   renderSetupSave();
   show('setup');
 }
+
+function setRadio(name, val) {
+  const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+  if (el) el.checked = true;
+}
+const radioVal = (name, d) => (document.querySelector(`input[name="${name}"]:checked`) || {}).value || d;
 
 function renderSetupSave() {
   $('#setup-save').textContent = S.setupMode === 'edit' ? t('saveChanges') : t('openRoom');
@@ -1488,6 +1836,10 @@ function parsePlaylist(s) {
 
 const mkTrack = x => ({ id: x.id, t: x.title_short || x.title, a: x.artist.name });
 const playable = x => x && x.id && x.readable !== false && x.preview && x.artist;
+/* Karaoke, tribute and "made famous by" versions are left out. */
+const COVER_RE = /karaoke|tribute|cover(ed)? by|\(cover\)|cover version|made famous|in the style of|originally (performed|by|recorded)|backing track|instrumental version|8[- ]?bit|lullaby|music box|sing[- ]?along|re-?recorded by|performed by|playback version|as popularized/i;
+const isCover = x => COVER_RE.test([x.title, x.title_version, x.artist && x.artist.name, x.album && x.album.title].filter(Boolean).join(' | '));
+const goodTrack = x => playable(x) && !isCover(x);
 
 async function fetchPlaylistTracks(id, onProgress) {
   const info = await dz('playlist/' + id);
@@ -1496,7 +1848,7 @@ async function fetchPlaylistTracks(id, onProgress) {
   for (let index = 0; index < total; index += 100) {
     const page = await dz(`playlist/${id}/tracks`, { index, limit: 100 });
     (page.data || []).forEach(x => {
-      if (playable(x) && !seen.has(x.id)) { seen.add(x.id); tracks.push(mkTrack(x)); }
+      if (goodTrack(x) && !seen.has(x.id)) { seen.add(x.id); tracks.push(mkTrack(x)); }
     });
     if (onProgress) onProgress(tracks.length, info);
     if (!page.next) break;
@@ -1759,13 +2111,16 @@ function scoreCand(c, it) {
 async function searchTracks(q, limit) {
   try {
     const r = await dz('search', { q, limit: limit || 10 });
-    return (r.data || []).filter(playable);
+    return (r.data || []).filter(goodTrack);
   } catch (e) { if (e.message === 'network' || e.message === 'timeout') throw e; return []; }
 }
 function bestOf(cands, it) {
-  let best = null, bs = 0;
-  cands.forEach(c => { const sc = scoreCand(c, it); if (sc > bs) { bs = sc; best = c; } });
-  return bs >= 0.6 ? mkTrack(best) : null;
+  const ok = cands.map(c => ({ c, s: scoreCand(c, it) })).filter(o => o.s >= 0.6);
+  if (!ok.length) return null;
+  const top = Math.max(...ok.map(o => o.s));
+  /* among near-equal matches, take the most popular (usually the original) */
+  const near = ok.filter(o => o.s >= top - 0.1).sort((a, b) => (b.c.rank || 0) - (a.c.rank || 0));
+  return mkTrack(near[0].c);
 }
 function searchTextFor(it) {
   if (it.title || it.artist) return (firstArtist(it.artist) + ' ' + cleanTitle(it.title)).trim();
@@ -1827,7 +2182,7 @@ async function edSearch() {
   edMsg('#ed-s-msg', '');
   try {
     const r = await dz('search', { q, limit: 25 });
-    S.edRes = (r.data || []).filter(playable).map(mkTrack);
+    S.edRes = (r.data || []).filter(goodTrack).map(mkTrack);
     renderEdResults();
     if (!S.edRes.length) edMsg('#ed-s-msg', t('noSongs'));
   } catch (e) { edMsg('#ed-s-msg', t('netErr'), true); }
@@ -1907,7 +2262,7 @@ async function addSearch() {
       edMsg('#add-msg', t('shortTrackLink'), true); return;
     } else {
       const r = await dz('search', { q, limit: 20 });
-      list = (r.data || []).filter(playable).map(mkTrack);
+      list = (r.data || []).filter(goodTrack).map(mkTrack);
     }
     S.addRes = list;
     renderAddRes();
@@ -1982,7 +2337,9 @@ async function saveSetup(btn) {
   let val = 0;
   if (mode === 'songs') val = clamp(parseInt($('#end-songs').value, 10) || 10, 1, 500);
   if (mode === 'time') val = clamp(parseInt($('#end-min').value, 10) || 30, 1, 600);
-  const settings = { plId: S.pl.id, plTitle: S.pl.title, plPic: S.pl.pic || '', endMode: mode, endValue: val, ver: Date.now() };
+  const gmode = radioVal('gmode', 'compete'), soundWhere = radioVal('soundwhere', 'all');
+  LS.set('gmode', gmode); LS.set('soundwhere', soundWhere);
+  const settings = { plId: S.pl.id, plTitle: S.pl.title, plPic: S.pl.pic || '', endMode: mode, endValue: val, mode: gmode, soundWhere, ver: Date.now() };
   btn.disabled = true;
   try {
     if (S.setupMode === 'create') {
@@ -1993,7 +2350,7 @@ async function saveSetup(btn) {
       });
       enterRoom(code);
     } else {
-      await S.ref.update({ settings, tracks: S.pl.tracks, status: 'lobby', round: null, played: null });
+      await S.ref.update({ settings, tracks: S.pl.tracks, status: 'lobby', round: null, played: null, results: null });
       S.editing = false;
       renderCurrent();
     }
@@ -2006,12 +2363,12 @@ document.addEventListener('click', e => {
   const actEl = e.target.closest('[data-act]');
   if (actEl) {
     const act = actEl.dataset.act;
-    if (act === 'settings') $('#dlg').showModal();
+    if (act === 'settings') { $('#vol').value = Math.round(userVol() * 100); $('#dlg').showModal(); }
     if (act === 'addsong') openAddSong();
     if (act === 'sound') {
       prefs.sound = !prefs.sound; LS.set('sound', prefs.sound);
       renderSoundBtns();
-      if (!prefs.sound) stopAudio();
+      if (!prefs.sound) { stopAudio(); pauseFull(); }
       else if (S.room && S.room.status === 'playing') { S.lastKey = null; handleAudio(); }
       updateStageHint();
     }
@@ -2052,6 +2409,7 @@ document.addEventListener('click', e => {
   if (appEl) {
     prefs.app = appEl.dataset.app; LS.set('app', prefs.app);
     $$('#app-seg [data-app]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.app === prefs.app)));
+    if (FULL.key) clearFull();
     renderReveal();
   }
 });
@@ -2092,19 +2450,36 @@ $('#g-play').addEventListener('click', () => {
   const r = S.room && S.room.round, tr = curTrack();
   if (!r || !tr) return;
   unlockAudio();
+  if (P.playing) { stopAudio(); updateStageHint(); return; }
+  claimTab();
   if (r.state === 'revealed') {
-    if (P.playing) { stopAudio(); }
-    else if (P.id === tr.id && P.audio.currentTime > 0 && P.audio.currentTime < (P.audio.duration || 30) - 0.3) {
+    if (P.id === tr.id && P.audio.currentTime > 0 && P.audio.currentTime < (P.audio.duration || 30) - 0.3) {
+      pauseFull(); setVol(userVol());
       P.audio.play().then(() => { P.needTap = false; updatePlayBtn(); updateStageHint(); }).catch(() => {});
     } else playClip(tr.id, null);
   } else {
     playClip(tr.id, SLICES[r.level || 0]);
   }
 });
-$('#g-listen').addEventListener('click', () => stopAudio());
+$('#g-stops').addEventListener('click', e => {
+  const b = e.target.closest('[data-level]');
+  if (b && !b.disabled) hostAction('level', b, b.dataset.level);
+});
+$('#g-trk').addEventListener('click', e => {
+  if (!$('#g-trk').classList.contains('tap')) return;
+  const rc = $('#g-trk').getBoundingClientRect();
+  let x = (e.clientX - rc.left) / rc.width;
+  if (document.documentElement.dir === 'rtl') x = 1 - x;
+  hostAction('level', null, Math.round(clamp(x, 0, 1) * MAX_LEVEL));
+});
+$('#vol').addEventListener('input', e => {
+  prefs.vol = clamp((+e.target.value || 0) / 100, 0, 1); LS.set('vol', prefs.vol);
+  if (!fadeT) setVol(userVol());
+});
+$('#g-listen').addEventListener('click', () => { stopAudio(); pauseFull(); });
 $('#g-end').addEventListener('click', () => { if (confirm(t('confirmEnd'))) endGame(); });
 
-$('#btn-again').addEventListener('click', () => { S.endRung = false; S.ref.update({ status: 'lobby', round: null, played: null }); });
+$('#btn-again').addEventListener('click', () => { S.endRung = false; S.ref.update({ status: 'lobby', round: null, played: null, results: null }); });
 $('#btn-newmusic').addEventListener('click', () => openSetup('edit'));
 $('#btn-leave-end').addEventListener('click', () => leaveRoom());
 $('#dlg-leave').addEventListener('click', () => { $('#dlg').close(); leaveRoom(); });
