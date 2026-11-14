@@ -187,8 +187,19 @@ input:disabled{background:var(--soft);opacity:.7}
 .gfield.found input,.gfield.missed input{opacity:1;font-weight:600}
 .gfield.found input{background:var(--go);color:var(--on-go);-webkit-text-fill-color:var(--on-go)}
 .gfield.missed input{background:var(--soft);color:var(--ink);-webkit-text-fill-color:var(--ink)}
+.clapbtn{min-height:42px;border:2.5px solid var(--ink);border-radius:999px;background:var(--panel);color:var(--ink);font:700 16px var(--body);padding:2px 12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;box-shadow:2px 2px 0 var(--shadow)}
+.clapbtn:active{transform:translate(2px,2px);box-shadow:none}
+.clapbtn span{font-size:22px;line-height:1}
+.clapbtn b:empty{display:none}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+.clapbtn.pop span{display:inline-block;animation:pop .35s ease-out}
+.clapfly{position:fixed;bottom:90px;font-size:34px;pointer-events:none;z-index:70;animation:clapfly 1.7s ease-out forwards}
+@keyframes clapfly{0%{transform:translateY(0) scale(.5);opacity:0}15%{opacity:1;transform:translateY(-24px) scale(1.15)}100%{transform:translateY(-58vh) scale(1);opacity:0}}
+@media (prefers-reduced-motion: reduce){.clapfly{animation-duration:.01s}.clapbtn.pop span{animation:none}}
+.playedline{margin:-6px 0 16px;text-align:center;color:var(--muted);font-weight:600;font-size:14px}
 .frow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
-.frow .btn.small{min-height:42px;padding:6px 14px;font-size:15px}
+.frow .btn.small{min-height:42px;padding:6px 14px;font-size:15px;white-space:nowrap}
+.frow .link{white-space:nowrap}
 .stats{list-style:none;margin:0;padding:0}
 .stats li{display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:2px dashed var(--soft);font-weight:500}
 .stats li:last-child{border-bottom:0}
@@ -484,18 +495,11 @@ dialog h2{margin-bottom:16px}
     <p class="fullnote"><span class="hidden" id="g-fullnote"></span> <a class="link" id="g-listen" target="_blank" rel="noopener"></a></p>
   </div>
   <div class="frow">
-    <button class="btn small" data-act="addsong" data-t="addSongBtn"></button>
+    <button class="btn small" data-act="addsong" data-t="addSongShort"></button>
+    <button class="clapbtn hidden" id="g-clap" data-ta="clap"><span aria-hidden="true">👏</span><b id="g-clapn"></b></button>
     <span class="hidden" id="g-endwrap"><button class="link" id="g-end" data-t="endGame"></button></span>
   </div>
-  <div class="card">
-    <h3 data-t="stats"></h3>
-    <ul class="stats" id="g-stats"></ul>
-    <p class="scoring" data-t="scoringNote"></p>
-  </div>
-  <div class="card" id="g-scorecard">
-    <h3 data-t="scores"></h3>
-    <ol class="board" id="g-board"></ol>
-  </div>
+  <p class="playedline" id="g-played"></p>
 </section>
 
 <!-- END -->
@@ -509,7 +513,7 @@ dialog h2{margin-bottom:16px}
     <h2 data-t="gameOver"></h2>
     <p class="winner" id="e-winner"></p>
   </div>
-  <div class="card"><h3 data-t="stats"></h3><ul class="stats" id="e-stats"></ul></div>
+  <div class="card"><h3 data-t="stats"></h3><ul class="stats" id="e-stats"></ul><p class="scoring" data-t="scoringNote"></p></div>
   <div class="card" id="e-boardcard"><ol class="board big" id="e-board"></ol></div>
   <p class="hint" id="e-wait" data-t="waitHost"></p>
   <button class="btn block" id="btn-leave-end" data-t="leave"></button>
@@ -732,7 +736,7 @@ const STR = {
     playAgain: "Play again", newMusic: "Change the music", leave: "Leave room",
     settings: "Settings", language: "Language", musicApp: "Open full songs in", close: "Done",
     soundBtn: "Sound on this phone",
-    titleMain: "Song", artistBonus: "Artist (bonus)", lblSong: "Song", lblArtist: "Artist +1",
+    titleMain: "Song", artistBonus: "Artist (bonus)", lblSong: "Song", lblArtist: "Artist +1", clap: "Applause", addSongShort: "+ Add song", playedLine: "Songs played so far: {n}",
     hintShort: "Year: {y}", noYearShort: "No year",
     play: "Play", stop: "Stop", reveal: "Reveal the answer",
     hintBtn: "Hint: year", hintYear: "Original release year: {y}", hintLoading: "Looking up the year…", noYear: "No year found for this song",
@@ -836,7 +840,7 @@ const STR = {
     playAgain: "משחק נוסף", newMusic: "החלפת מוזיקה", leave: "יציאה מהחדר",
     settings: "הגדרות", language: "שפה", musicApp: "פתיחת שירים מלאים ב:", close: "סיום",
     soundBtn: "צליל בטלפון הזה",
-    titleMain: "שם השיר", artistBonus: "מבצע (בונוס)", lblSong: "שיר", lblArtist: "מבצע +1",
+    titleMain: "שם השיר", artistBonus: "מבצע (בונוס)", lblSong: "שיר", lblArtist: "מבצע +1", clap: "מחיאות כפיים", addSongShort: "+ הוספת שיר", playedLine: "שירים שהושמעו עד עכשיו: {n}",
     hintShort: "שנה: {y}", noYearShort: "אין שנה",
     play: "ניגון", stop: "עצירה", reveal: "חשיפת התשובה",
     hintBtn: "רמז: שנה", hintYear: "שנת יציאה מקורית: {y}", hintLoading: "מחפש את השנה…", noYear: "לא נמצאה שנה לשיר הזה",
@@ -998,11 +1002,22 @@ function dzOnce(path, params) {
 }
 
 /* ---------- Sound ---------- */
-const P = { audio: new Audio(), id: null, ready: null, meta: null, token: 0, stopT: null, needTap: false, playing: false, loading: false, err: false };
+const P = { audio: new Audio(), id: null, ready: null, meta: null, token: 0, stopT: null, stopAt: null, needTap: false, playing: false, loading: false, err: false };
 P.audio.preload = 'auto';
 P.audio.addEventListener('play', () => { P.playing = true; updatePlayBtn(); });
 P.audio.addEventListener('pause', () => { P.playing = false; updatePlayBtn(); });
 P.audio.addEventListener('ended', () => { P.playing = false; updatePlayBtn(); });
+/* Safety net for the clip length. The normal cut-off is a page timer, but a
+   phone slows page timers right down when the game isn't the front window
+   (a video call, another app, a dimmed screen) while the sound keeps playing.
+   The audio's own clock keeps running, so it is checked too. */
+P.audio.addEventListener('timeupdate', () => {
+  if (P.stopAt != null && P.audio.currentTime >= P.stopAt + 0.08) {
+    P.stopAt = null; clearTimeout(P.stopT); clearInterval(fadeT); fadeT = null;
+    try { P.audio.pause(); } catch (e) {}
+    setVol(userVol());
+  }
+});
 
 function loadTrack(id) {
   if (P.id === id && P.ready) return P.ready;
@@ -1047,7 +1062,7 @@ function fadeTo(target, ms, done) {
 
 async function playClip(id, sec) {
   const token = ++P.token;
-  clearTimeout(P.stopT); clearInterval(fadeT);
+  clearTimeout(P.stopT); clearInterval(fadeT); P.stopAt = null;
   try { await loadTrack(id); } catch (e) { return; }
   if (token !== P.token || P.id !== id) return;
   const a = P.audio;
@@ -1063,18 +1078,19 @@ async function playClip(id, sec) {
     P.needTap = true; updatePlayBtn(); updateStageHint(); return;
   }
   if (token !== P.token) { a.pause(); setVol(userVol()); return; }
+  P.stopAt = sec || null;
   fadeTo(userVol(), sec && sec < 1 ? 25 : 60);
   updatePlayBtn(); updateStageHint();
   if (sec) {
     const ms = sec * 1000, out = Math.min(150, ms * 0.25);
     P.stopT = setTimeout(() => {
       if (token !== P.token) return;
-      fadeTo(0, out, () => { if (token === P.token) { a.pause(); setVol(userVol()); } });
+      fadeTo(0, out, () => { if (token === P.token) { P.stopAt = null; a.pause(); setVol(userVol()); } });
     }, ms - out);
   }
 }
 function stopAudio() {
-  P.token++; clearTimeout(P.stopT); clearInterval(fadeT); fadeT = null;
+  P.token++; clearTimeout(P.stopT); clearInterval(fadeT); fadeT = null; P.stopAt = null;
   try { P.audio.pause(); } catch (e) {}
   setVol(userVol());
 }
@@ -1201,6 +1217,66 @@ function unlockAudio() {
   } catch (e) {}
 }
 document.addEventListener('pointerdown', unlockAudio, { passive: true });
+/* ---------- Applause: anyone can clap for whoever identified the song ---------- */
+function watchClaps(room) {
+  const r = room.round;
+  const num = r ? r.num : null;
+  const count = (num != null && room.claps && room.claps[num] && room.claps[num].count) || 0;
+  const prev = S.prevClaps;
+  S.prevClaps = { num, count };
+  if (!prev || prev.num !== num || room.status !== 'playing') return;
+  const added = count - prev.count;
+  if (added > 0) celebrate(Math.min(added, 6));
+}
+function celebrate(n) {
+  clapSound();
+  const btn = $('#g-clap');
+  if (btn) { btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
+  for (let i = 0; i < n * 2; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'clapfly';
+      el.textContent = '\u{1F44F}';
+      el.style.left = (10 + Math.random() * 80) + 'vw';
+      el.style.fontSize = (26 + Math.random() * 18) + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1800);
+    }, i * 110);
+  }
+}
+function clapSound() {
+  if (!prefs.sound || !actx) return;
+  try {
+    const t0 = actx.currentTime;
+    for (let k = 0; k < 3; k++) {
+      const len = Math.floor(actx.sampleRate * 0.06), buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+      const src = actx.createBufferSource(), bp = actx.createBiquadFilter(), g = actx.createGain();
+      src.buffer = buf; bp.type = 'bandpass'; bp.frequency.value = 1200 + Math.random() * 600; bp.Q.value = 0.8;
+      g.gain.value = 0.35 * userVol();
+      src.connect(bp); bp.connect(g); g.connect(actx.destination);
+      src.start(t0 + k * 0.09 + Math.random() * 0.02);
+    }
+  } catch (e) {}
+}
+let lastClap = 0;
+async function sendClap() {
+  const r = S.room && S.room.round;
+  if (!S.ref || !r || !(r.titleBy || r.artistBy)) return;
+  const nowMs = Date.now();
+  if (nowMs - lastClap < 250) return;
+  lastClap = nowMs;
+  unlockAudio();
+  try {
+    await S.ref.child('claps/' + r.num).transaction(cur => {
+      cur = cur || { count: 0 };
+      cur.count = (cur.count || 0) + 1;
+      cur.last = me.pid;
+      return cur;
+    });
+  } catch (e) { toast(t('netErr')); }
+}
+
 function ding() {
   if (!prefs.sound || !actx) return;
   const t0 = actx.currentTime;
@@ -1336,6 +1412,7 @@ function onRoom(room) {
   const ver = room.settings && room.settings.ver;
   if (ver !== S.tracksVer) { S.tracksVer = ver; buildLists(room.tracks || []); }
   notify(room);
+  watchClaps(room);
   S.prevRound = room.round ? Object.assign({}, room.round) : null;
   if (room.status !== 'ended') S.endRung = false;
   $('#dlg-leave').classList.remove('hidden');
@@ -1498,9 +1575,10 @@ function renderGame() {
   }
   $('#g-wait').textContent = ctl ? '' : (revealed ? t('waitNext') : '');
 
-  renderStats('#g-stats');
-  $('#g-scorecard').classList.toggle('hidden', isTogether());
-  if (!isTogether()) renderBoard('#g-board', false);
+  $('#g-played').textContent = t('playedLine', { n: computeStats(room).played });
+  const cl = room.claps && room.claps[r.num];
+  $('#g-clap').classList.toggle('hidden', !(r.titleBy || r.artistBy));
+  $('#g-clapn').textContent = cl && cl.count ? String(cl.count) : '';
   $('#g-endwrap').classList.toggle('hidden', !ctl);
 }
 
@@ -1693,7 +1771,7 @@ function pickIndex(played) {
 async function startGame() {
   const idx = pickIndex(null);
   if (idx < 0) return;
-  const up = { status: 'playing', startedAt: SV, played: { [idx]: true }, results: null, round: { num: 1, idx, level: 0, state: 'guessing' } };
+  const up = { status: 'playing', startedAt: SV, played: { [idx]: true }, results: null, claps: null, round: { num: 1, idx, level: 0, state: 'guessing' } };
   sortedPlayers().forEach(p => { up['players/' + p.id + '/score'] = 0; });
   try { await S.ref.update(up); markPlayed(idx); } catch (e) { toast(t('netErr')); }
 }
@@ -2481,7 +2559,7 @@ async function saveSetup(btn) {
       });
       enterRoom(code);
     } else {
-      await S.ref.update({ settings, tracks: S.pl.tracks, status: 'lobby', round: null, played: null, results: null });
+      await S.ref.update({ settings, tracks: S.pl.tracks, status: 'lobby', round: null, played: null, results: null, claps: null });
       S.editing = false;
       renderCurrent();
     }
@@ -2585,7 +2663,7 @@ $('#g-play').addEventListener('click', () => {
   claimTab();
   if (r.state === 'revealed') {
     if (P.id === tr.id && P.audio.currentTime > 0 && P.audio.currentTime < (P.audio.duration || 30) - 0.3) {
-      pauseFull(); setVol(userVol());
+      pauseFull(); setVol(userVol()); P.stopAt = null;
       P.audio.play().then(() => { P.needTap = false; updatePlayBtn(); updateStageHint(); }).catch(() => {});
     } else playClip(tr.id, null);
   } else {
@@ -2608,9 +2686,10 @@ $('#vol').addEventListener('input', e => {
   if (!fadeT) setVol(userVol());
 });
 $('#g-listen').addEventListener('click', () => { stopAudio(); pauseFull(); });
+$('#g-clap').addEventListener('click', sendClap);
 $('#g-end').addEventListener('click', () => { if (confirm(t('confirmEnd'))) endGame(); });
 
-$('#btn-again').addEventListener('click', () => { S.endRung = false; S.ref.update({ status: 'lobby', round: null, played: null, results: null }); });
+$('#btn-again').addEventListener('click', () => { S.endRung = false; S.ref.update({ status: 'lobby', round: null, played: null, results: null, claps: null }); });
 $('#btn-newmusic').addEventListener('click', () => openSetup('edit'));
 $('#btn-leave-end').addEventListener('click', () => leaveRoom());
 $('#dlg-leave').addEventListener('click', () => { $('#dlg').close(); leaveRoom(); });
@@ -2735,7 +2814,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 /* ---------- New version check ----------
    When a newer version is uploaded, players get a small "Update" banner.
    Updating reloads the page and puts them straight back in their room. */
-const APP_VERSION = '2026-11-14a';
+const APP_VERSION = '2026-11-14c';
 async function checkVersion() {
   if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
   try {
