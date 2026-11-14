@@ -138,39 +138,57 @@ input:disabled{background:var(--soft);opacity:.7}
 .opt .num{display:flex;align-items:center;gap:6px}
 .opt .num input{width:84px;min-height:44px;padding:6px 10px;text-align:center}
 
-/* game: control panel pinned to the top */
-.ctrl{position:sticky;top:0;z-index:25;background:var(--panel);border:2.5px solid var(--ink);border-top:0;border-radius:0 0 22px 22px;box-shadow:0 4px 0 var(--shadow);margin:-12px -6px 16px;padding:10px 12px 12px}
-.ctrl-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.ctrl-top .brand svg{width:28px;height:28px}
-.ctrl-top .info{flex:1;min-width:0;font-weight:600;font-size:15px;line-height:1.25}
-.ctrl-top .info .tl{display:block;color:var(--muted);font-weight:500;font-size:13px}
-.iconbtn.sm{width:40px;height:40px;box-shadow:none}
-.iconbtn.sm svg{width:20px;height:20px}
-.stage{display:flex;align-items:center;gap:12px}
+/* game: control panel pinned to the top (compact, so the whole game fits one screen) */
+.ctrl{position:sticky;top:0;z-index:25;background:var(--panel);border:2.5px solid var(--ink);border-top:0;border-radius:0 0 22px 22px;box-shadow:0 4px 0 var(--shadow);margin:-12px -6px 12px;padding:8px 12px 10px}
+.ctrl-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ctrl-top .brand svg{width:24px;height:24px}
+.ctrl-top .brand .rc{font-size:14px;padding:1px 8px}
+.ctrl-top .info{flex:1;min-width:0;font-weight:600;font-size:14px;line-height:1.2}
+.ctrl-top .info .tl{display:block;color:var(--muted);font-weight:500;font-size:12px}
+.iconbtn.sm{width:36px;height:36px;box-shadow:none}
+.iconbtn.sm svg{width:18px;height:18px}
+.stage{display:flex;align-items:center;gap:10px}
 .stageinfo{flex:1;min-width:0}
-.playbtn{width:66px;height:66px;border-radius:50%;border:3px solid var(--ink);background:var(--hot);color:var(--on-hot);display:grid;place-items:center;box-shadow:3px 3px 0 var(--shadow);cursor:pointer;flex:none;padding:0}
+.playbtn{width:56px;height:56px;border-radius:50%;border:3px solid var(--ink);background:var(--hot);color:var(--on-hot);display:grid;place-items:center;box-shadow:3px 3px 0 var(--shadow);cursor:pointer;flex:none;padding:0}
 .playbtn:active{transform:translate(3px,3px);box-shadow:none}
-.playbtn svg{width:32px;height:32px}
+.playbtn svg{width:28px;height:28px}
 @keyframes pulse{0%,100%{box-shadow:3px 3px 0 var(--shadow),0 0 0 0 var(--hot)}50%{box-shadow:3px 3px 0 var(--shadow),0 0 0 12px transparent}}
 .playbtn.need{animation:pulse 1.2s infinite}
-.secs{font-family:var(--display);font-size:36px;line-height:1}
-.secs small{font-family:var(--body);font-size:16px;font-weight:600;margin-inline-start:5px}
-.stagehint{color:var(--muted);font-weight:500;font-size:14px;margin-top:3px;line-height:1.3}
-.dial{margin-top:14px;--p:0}
-.trk{position:relative;height:14px;border:2.5px solid var(--ink);border-radius:999px;background:var(--soft);margin:0 14px}
+.secs{font-family:var(--display);font-size:30px;line-height:1}
+.secs small{font-family:var(--body);font-size:15px;font-weight:600;margin-inline-start:4px}
+.stagehint{color:var(--muted);font-weight:500;font-size:13px;margin-top:2px;line-height:1.25}
+.stage .btn.small{min-height:40px;padding:6px 12px;font-size:15px;box-shadow:2px 2px 0 var(--shadow)}
+.hintval{flex:none;background:var(--soft);border:2px solid var(--ink);border-radius:999px;padding:5px 12px;font-weight:700;font-size:15px;white-space:nowrap}
+.dial{margin-top:10px;--p:0}
+.trk{position:relative;height:12px;border:2.5px solid var(--ink);border-radius:999px;background:var(--soft);margin:0 14px}
 .trk.tap{cursor:pointer}
 .fill{position:absolute;top:0;bottom:0;inset-inline-start:0;width:calc(var(--p) * 100%);background:var(--dial);border-radius:999px;transition:width .4s cubic-bezier(.3,1.4,.6,1)}
-.needle{position:absolute;top:-10px;width:6px;height:30px;margin-inline-start:-3px;inset-inline-start:calc(var(--p) * 100%);background:var(--ink);border-radius:3px;transition:inset-inline-start .4s cubic-bezier(.3,1.4,.6,1)}
-.stops{display:flex;justify-content:space-between;margin-top:6px}
-.stops button{background:none;border:0;font:600 15px var(--body);color:var(--muted);min-width:34px;min-height:36px;padding:4px 2px;border-radius:10px;cursor:pointer}
+.needle{position:absolute;top:-9px;width:6px;height:26px;margin-inline-start:-3px;inset-inline-start:calc(var(--p) * 100%);background:var(--ink);border-radius:3px;transition:inset-inline-start .4s cubic-bezier(.3,1.4,.6,1)}
+.stops{display:flex;justify-content:space-between;margin-top:4px}
+.stops button{background:none;border:0;font:600 14px var(--body);color:var(--muted);min-width:32px;min-height:32px;padding:2px;border-radius:10px;cursor:pointer}
 .stops button.on{color:var(--ink)}
 .stops button.cur{background:var(--ink);color:var(--panel)}
 .stops button:disabled{cursor:default}
-.hintval{display:inline-block;margin-top:8px;background:var(--soft);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;font-weight:600}
-.ctrl-btns{display:flex;gap:8px;margin-top:10px}
-.ctrl-btns .btn{flex:1;min-height:46px;font-size:16px;padding:8px 10px;box-shadow:2px 2px 0 var(--shadow)}
-.waitline{margin:8px 0 0;text-align:center;color:var(--muted);font-weight:500;font-size:15px}
+.ctrl-btns{display:flex;gap:8px;margin-top:8px}
+.ctrl-btns .btn{flex:1;min-height:42px;font-size:16px;padding:6px 10px;box-shadow:2px 2px 0 var(--shadow)}
+.waitline{margin:6px 0 0;text-align:center;color:var(--muted);font-weight:500;font-size:14px}
 .waitline:empty{display:none}
+/* answer fields: they lock (green) when someone gets it, and show the answer after the reveal */
+.card.tight{padding:12px;margin-bottom:12px}
+.gfield{position:relative}
+.gfield + .gfield{margin-top:8px}
+.grow{display:flex;gap:8px;align-items:center}
+.gl{flex:none;width:44px;font-size:13px;font-weight:700;color:var(--muted);line-height:1.15}
+.grow input{flex:1;min-width:0;min-height:46px;padding:8px 12px;font-size:17px}
+.grow .btn{min-height:46px}
+.lock{display:none;flex:none;max-width:96px;font-size:13px;font-weight:700;color:var(--go);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gfield.found .lock{display:block}
+.gfield.found .btn,.gfield.missed .btn{display:none}
+.gfield.found input,.gfield.missed input{opacity:1;font-weight:600}
+.gfield.found input{background:var(--go);color:var(--on-go);-webkit-text-fill-color:var(--on-go)}
+.gfield.missed input{background:var(--soft);color:var(--ink);-webkit-text-fill-color:var(--ink)}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.frow .btn.small{min-height:42px;padding:6px 14px;font-size:15px}
 .stats{list-style:none;margin:0;padding:0}
 .stats li{display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:2px dashed var(--soft);font-weight:500}
 .stats li:last-child{border-bottom:0}
@@ -179,11 +197,12 @@ input:disabled{background:var(--soft);opacity:.7}
 .stats .v{font-family:var(--display);font-size:22px;min-width:40px;text-align:end}
 .stats li.total{background:var(--soft);border-radius:12px;padding-inline:10px;border-bottom:0}
 .scoring{font-size:14px;color:var(--muted);margin:10px 0 0}
-.full{margin:0 0 8px}
+.full{margin:0 0 6px}
 .full iframe{border:0;width:100%;border-radius:12px;display:block}
-.ytbox{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.ytbox{position:relative;aspect-ratio:16/9;max-height:170px;border-radius:12px;overflow:hidden;background:#000}
 .ytbox iframe,.ytbox>div{position:absolute;inset:0;width:100%;height:100%;border:0}
-.fullnote{font-size:13px;color:var(--muted);margin:4px 0 6px}
+.fullnote{font-size:13px;color:var(--muted);margin:0}
+.fullnote .link{font-size:13px;padding:4px 2px}
 input[type=range]{width:100%;accent-color:var(--hot);min-height:36px}
 .slots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .slot{background:var(--panel);border:2.5px solid var(--ink);border-radius:18px;box-shadow:3px 3px 0 var(--shadow);padding:12px 14px;min-height:104px;display:flex;flex-direction:column}
@@ -431,46 +450,42 @@ dialog h2{margin-bottom:16px}
         <div class="stagehint" id="g-hint"></div>
       </div>
       <button class="btn small hidden" id="g-hintbtn" data-host="hint" data-t="hintBtn"></button>
+      <span class="hintval hidden" id="g-hintval"></span>
     </div>
     <div class="dial" id="g-dial">
       <div class="trk" id="g-trk"><div class="fill"></div><div class="needle"></div></div>
       <div class="stops" id="g-stops"></div>
     </div>
-    <div class="center"><span class="hintval hidden" id="g-hintval"></span></div>
     <div class="ctrl-btns hidden" id="g-btns"></div>
     <p class="waitline" id="g-wait"></p>
   </div>
-  <div class="slots">
-    <div class="slot" id="slot-title"><div class="lb" data-t="titleMain"></div><div class="val"></div><div class="by"></div></div>
-    <div class="slot" id="slot-artist"><div class="lb" data-t="artistBonus"></div><div class="val"></div><div class="by"></div></div>
-  </div>
-  <div class="card" id="g-guess">
-    <div class="field ac">
-      <label class="lab" for="in-title" data-t="titleMain"></label>
-      <div class="row">
+  <div class="card tight" id="g-guess">
+    <div class="gfield ac" id="gf-title">
+      <div class="grow">
+        <label class="gl" for="in-title" data-t="lblSong"></label>
         <input id="in-title" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" data-tp="guessTitlePh">
         <button class="btn small" data-guess="title" data-t="guess"></button>
+        <span class="lock"></span>
       </div>
       <ul class="ac-list" id="ac-title" hidden></ul>
     </div>
-    <div class="field ac" style="margin-bottom:0">
-      <label class="lab" for="in-artist" data-t="artistBonus"></label>
-      <div class="row">
+    <div class="gfield ac" id="gf-artist">
+      <div class="grow">
+        <label class="gl" for="in-artist" data-t="lblArtist"></label>
         <input id="in-artist" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" data-tp="guessArtistPh">
         <button class="btn small" data-guess="artist" data-t="guess"></button>
+        <span class="lock"></span>
       </div>
       <ul class="ac-list" id="ac-artist" hidden></ul>
     </div>
   </div>
-  <div class="card hidden" id="g-reveal">
-    <div class="rhead" id="g-rhead"></div>
-    <div class="rbody">
-      <img id="g-cover" alt="">
-      <div><div class="rtitle" id="g-rtitle"></div><div class="rartist" id="g-rartist"></div></div>
-    </div>
+  <div class="card tight hidden" id="g-reveal">
     <div class="full" id="g-full"></div>
-    <p class="fullnote hidden" id="g-fullnote"></p>
-    <a class="link" id="g-listen" target="_blank" rel="noopener"></a>
+    <p class="fullnote"><span class="hidden" id="g-fullnote"></span> <a class="link" id="g-listen" target="_blank" rel="noopener"></a></p>
+  </div>
+  <div class="frow">
+    <button class="btn small" data-act="addsong" data-t="addSongBtn"></button>
+    <span class="hidden" id="g-endwrap"><button class="link" id="g-end" data-t="endGame"></button></span>
   </div>
   <div class="card">
     <h3 data-t="stats"></h3>
@@ -481,8 +496,6 @@ dialog h2{margin-bottom:16px}
     <h3 data-t="scores"></h3>
     <ol class="board" id="g-board"></ol>
   </div>
-  <button class="btn block" data-act="addsong" data-t="addSongBtn" style="margin-bottom:16px"></button>
-  <div class="center hidden" id="g-endwrap"><button class="link" id="g-end" data-t="endGame"></button></div>
 </section>
 
 <!-- END -->
@@ -719,7 +732,8 @@ const STR = {
     playAgain: "Play again", newMusic: "Change the music", leave: "Leave room",
     settings: "Settings", language: "Language", musicApp: "Open full songs in", close: "Done",
     soundBtn: "Sound on this phone",
-    titleMain: "Song", artistBonus: "Artist (bonus)",
+    titleMain: "Song", artistBonus: "Artist (bonus)", lblSong: "Song", lblArtist: "Artist +1",
+    hintShort: "Year: {y}", noYearShort: "No year",
     play: "Play", stop: "Stop", reveal: "Reveal the answer",
     hintBtn: "Hint: year", hintYear: "Original release year: {y}", hintLoading: "Looking up the year…", noYear: "No year found for this song",
     stats: "This game", stPlayed: "Songs played", stBoth: "Song and artist", stSong: "Song only", stArtist: "Artist only", stNone: "Nobody knew",
@@ -731,7 +745,7 @@ const STR = {
     soundHostHint: "The music plays on the host's device. Tap to hear it here too.",
     otherTab: "The game is also open in another window here, so the music plays there. Tap to play here instead.",
     volume: "Volume on this device",
-    fullLoading: "Loading the full song…", fullSpNote: "Plays the whole song if you're signed in to Spotify (free or Premium) in this browser. Otherwise you'll hear a preview.",
+    fullLoading: "Loading the full song…", fullSpNote: "Full song if you're signed in to Spotify here.",
     openIn: "Open in {app}", waitCtl: "Waiting for the host…",
     updateReady: "A new version of the game is ready", updateNow: "Update",
     installApp: "Install the app on this phone", installed: "Installed! You'll find Rings a Bell on your home screen.",
@@ -822,7 +836,8 @@ const STR = {
     playAgain: "משחק נוסף", newMusic: "החלפת מוזיקה", leave: "יציאה מהחדר",
     settings: "הגדרות", language: "שפה", musicApp: "פתיחת שירים מלאים ב:", close: "סיום",
     soundBtn: "צליל בטלפון הזה",
-    titleMain: "שם השיר", artistBonus: "מבצע (בונוס)",
+    titleMain: "שם השיר", artistBonus: "מבצע (בונוס)", lblSong: "שיר", lblArtist: "מבצע +1",
+    hintShort: "שנה: {y}", noYearShort: "אין שנה",
     play: "ניגון", stop: "עצירה", reveal: "חשיפת התשובה",
     hintBtn: "רמז: שנה", hintYear: "שנת יציאה מקורית: {y}", hintLoading: "מחפש את השנה…", noYear: "לא נמצאה שנה לשיר הזה",
     stats: "המשחק הזה", stPlayed: "שירים שהושמעו", stBoth: "שיר ומבצע", stSong: "רק שיר", stArtist: "רק מבצע", stNone: "אף אחד לא ידע",
@@ -834,7 +849,7 @@ const STR = {
     soundHostHint: "המוזיקה מתנגנת במכשיר של המנחה. אפשר להקיש כדי לשמוע גם כאן.",
     otherTab: "המשחק פתוח גם בחלון נוסף במכשיר הזה, ולכן המוזיקה מתנגנת שם. אפשר להקיש כדי לנגן כאן.",
     volume: "עוצמת הצליל במכשיר הזה",
-    fullLoading: "טוען את השיר המלא…", fullSpNote: "השיר המלא מתנגן אם מחוברים לספוטיפיי (חינמי או פרימיום) בדפדפן הזה. אחרת יתנגן קטע קצר.",
+    fullLoading: "טוען את השיר המלא…", fullSpNote: "שיר מלא אם מחוברים כאן לספוטיפיי.",
     openIn: "פתיחה ב{app}", waitCtl: "מחכים למנחה…",
     updateReady: "גרסה חדשה של המשחק מוכנה", updateNow: "עדכון",
     installApp: "התקנת האפליקציה בטלפון", installed: "הותקן! Rings a Bell מחכה לך במסך הבית.",
@@ -1155,13 +1170,13 @@ async function showFull(tr) {
     const api = await spotifyApi();
     if (FULL.key !== key) return;
     if (api && api.createController) {
-      api.createController(el, { uri: 'spotify:track:' + links.sp, width: '100%', height: 152 }, ctrl => {
+      api.createController(el, { uri: 'spotify:track:' + links.sp, width: '100%', height: 80 }, ctrl => {
         if (FULL.key !== key) { try { ctrl.destroy(); } catch (e) {} return; }
         FULL.ctrl = ctrl; FULL.kind = 'sp';
         ctrl.addListener('playback_update', ev => { const d = ev && ev.data; if (d && !d.isPaused && !d.isBuffering) fullStarted(); });
       });
     } else {
-      el.outerHTML = `<iframe src="https://open.spotify.com/embed/track/${esc(links.sp)}" height="152" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
+      el.outerHTML = `<iframe src="https://open.spotify.com/embed/track/${esc(links.sp)}" height="80" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
     }
   } else if ((app === 'youtube' || app === 'ytmusic') && links.yt) {
     const wrap = document.createElement('div'); wrap.className = 'ytbox';
@@ -1455,19 +1470,16 @@ function renderGame() {
   $('#g-secs').innerHTML = `${secLabel(SLICES[lvl])}<small>${esc(t('secUnit'))}</small>`;
 
   const hv = $('#g-hintval');
-  if (r.hint) { hv.textContent = r.hint > 0 ? t('hintYear', { y: r.hint }) : t('noYear'); hv.classList.remove('hidden'); }
-  else if (S.hintBusy) { hv.textContent = t('hintLoading'); hv.classList.remove('hidden'); }
+  if (r.hint) {
+    hv.textContent = r.hint > 0 ? t('hintShort', { y: r.hint }) : t('noYearShort');
+    hv.title = r.hint > 0 ? t('hintYear', { y: r.hint }) : t('noYear');
+    hv.classList.remove('hidden');
+  } else if (S.hintBusy) { hv.textContent = '…'; hv.title = t('hintLoading'); hv.classList.remove('hidden'); }
   else hv.classList.add('hidden');
   $('#g-hintbtn').classList.toggle('hidden', !(ctl && !revealed && !r.hint && !S.hintBusy));
 
-  slot('#slot-title', r.titleBy, tr.t, revealed);
-  slot('#slot-artist', r.artistBy, showArtist(tr), revealed);
-
-  $('#g-guess').classList.toggle('hidden', revealed);
-  $('#in-artist').disabled = !!r.artistBy;
-  $('#in-title').disabled = !!r.titleBy;
-  $$('[data-guess="artist"]').forEach(b => b.disabled = !!r.artistBy);
-  $$('[data-guess="title"]').forEach(b => b.disabled = !!r.titleBy);
+  lockField('title', r.titleBy, tr.t, revealed);
+  lockField('artist', r.artistBy, showArtist(tr), revealed);
 
   renderReveal();
   updatePlayBtn(); updateStageHint();
@@ -1492,12 +1504,22 @@ function renderGame() {
   $('#g-endwrap').classList.toggle('hidden', !ctl);
 }
 
-function slot(sel, by, value, revealed) {
-  const el = $(sel);
-  el.classList.toggle('found', !!by);
-  el.classList.toggle('missed', !by && revealed);
-  el.querySelector('.val').textContent = (by || revealed) ? value : '?';
-  el.querySelector('.by').textContent = by ? t('namedBy', { name: playerName(by) }) : '';
+/* One field per answer: open for guessing, green and locked once someone gets
+   it (with their name), and showing the answer after the reveal. */
+function lockField(kind, by, value, revealed) {
+  const f = $('#gf-' + kind), inp = $('#in-' + kind);
+  const locked = !!by || revealed;
+  f.classList.toggle('found', !!by);
+  f.classList.toggle('missed', !by && revealed);
+  if (locked) {
+    if (inp.value !== value) inp.value = value;
+    inp.disabled = true;
+    $('#ac-' + kind).hidden = true;
+    f.querySelector('.lock').textContent = by ? '\u2713 ' + playerName(by) : '';
+  } else if (inp.disabled) {
+    inp.disabled = false; inp.value = '';
+    f.querySelector('.lock').textContent = '';
+  }
 }
 
 function renderReveal() {
@@ -1507,13 +1529,6 @@ function renderReveal() {
   const revealed = r.state === 'revealed';
   $('#g-reveal').classList.toggle('hidden', !revealed);
   if (!revealed || !tr) return;
-  $('#g-rhead').textContent = r.titleBy ? t('revealFound') : t('revealGaveUp');
-  $('#g-rtitle').textContent = tr.t;
-  $('#g-rartist').textContent = showArtist(tr);
-  const cover = P.meta && P.meta.id === tr.id && P.meta.album ? (P.meta.album.cover_medium || P.meta.album.cover || '') : '';
-  const img = $('#g-cover');
-  if (cover) { if (img.getAttribute('src') !== cover) img.src = cover; img.classList.remove('hidden'); }
-  else img.classList.add('hidden');
   const a = $('#g-listen');
   a.href = (APPS[prefs.app] || APPS.spotify).url(tr);
   a.textContent = t('openIn', { app: appName(prefs.app) });
@@ -2720,7 +2735,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 /* ---------- New version check ----------
    When a newer version is uploaded, players get a small "Update" banner.
    Updating reloads the page and puts them straight back in their room. */
-const APP_VERSION = '2026-11-06e';
+const APP_VERSION = '2026-11-14a';
 async function checkVersion() {
   if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
   try {
