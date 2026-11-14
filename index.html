@@ -629,6 +629,7 @@ dialog h2{margin-bottom:16px}
   <div class="stack">
     <button class="btn block hidden" id="dlg-leave" data-t="leave"></button>
     <button class="btn primary block" id="dlg-close" data-t="close"></button>
+    <p class="hint" id="ver" style="margin:6px 0 0;font-size:13px"></p>
   </div>
 </dialog>
 
@@ -736,7 +737,7 @@ const STR = {
     playAgain: "Play again", newMusic: "Change the music", leave: "Leave room",
     settings: "Settings", language: "Language", musicApp: "Open full songs in", close: "Done",
     soundBtn: "Sound on this phone",
-    titleMain: "Song", artistBonus: "Artist (bonus)", lblSong: "Song", lblArtist: "Artist +1", clap: "Applause", addSongShort: "+ Add song", playedLine: "Songs played so far: {n}",
+    titleMain: "Song", artistBonus: "Artist (bonus)", lblSong: "Song", lblArtist: "Artist +1", clap: "Applause", pickSongOf: "Pick from the list \u25BE", addSongShort: "+ Add song", playedLine: "Songs played so far: {n}",
     hintShort: "Year: {y}", noYearShort: "No year",
     play: "Play", stop: "Stop", reveal: "Reveal the answer",
     hintBtn: "Hint: year", hintYear: "Original release year: {y}", hintLoading: "Looking up the year…", noYear: "No year found for this song",
@@ -840,7 +841,7 @@ const STR = {
     playAgain: "משחק נוסף", newMusic: "החלפת מוזיקה", leave: "יציאה מהחדר",
     settings: "הגדרות", language: "שפה", musicApp: "פתיחת שירים מלאים ב:", close: "סיום",
     soundBtn: "צליל בטלפון הזה",
-    titleMain: "שם השיר", artistBonus: "מבצע (בונוס)", lblSong: "שיר", lblArtist: "מבצע +1", clap: "מחיאות כפיים", addSongShort: "+ הוספת שיר", playedLine: "שירים שהושמעו עד עכשיו: {n}",
+    titleMain: "שם השיר", artistBonus: "מבצע (בונוס)", lblSong: "שיר", lblArtist: "מבצע +1", clap: "מחיאות כפיים", pickSongOf: "בחרו מהרשימה \u25BE", addSongShort: "+ הוספת שיר", playedLine: "שירים שהושמעו עד עכשיו: {n}",
     hintShort: "שנה: {y}", noYearShort: "אין שנה",
     play: "ניגון", stop: "עצירה", reveal: "חשיפת התשובה",
     hintBtn: "רמז: שנה", hintYear: "שנת יציאה מקורית: {y}", hintLoading: "מחפש את השנה…", noYear: "לא נמצאה שנה לשיר הזה",
@@ -1005,8 +1006,8 @@ function dzOnce(path, params) {
 const P = { audio: new Audio(), id: null, ready: null, meta: null, token: 0, stopT: null, stopAt: null, needTap: false, playing: false, loading: false, err: false };
 P.audio.preload = 'auto';
 P.audio.addEventListener('play', () => { P.playing = true; updatePlayBtn(); });
-P.audio.addEventListener('pause', () => { P.playing = false; updatePlayBtn(); });
-P.audio.addEventListener('ended', () => { P.playing = false; updatePlayBtn(); });
+P.audio.addEventListener('pause', () => { P.playing = !!WA.src; updatePlayBtn(); });
+P.audio.addEventListener('ended', () => { P.playing = !!WA.src; updatePlayBtn(); });
 /* Safety net for the clip length. The normal cut-off is a page timer, but a
    phone slows page timers right down when the game isn't the front window
    (a video call, another app, a dimmed screen) while the sound keeps playing.
@@ -1027,6 +1028,7 @@ function loadTrack(id) {
     if (!d.preview) throw new Error('nopreview');
     if (P.id !== id) return;
     P.meta = d;
+    prepareBuffer(id, d.preview);
     return new Promise((resolve, reject) => {
       const a = P.audio;
       const ok = () => { clean(); resolve(); };
@@ -1046,6 +1048,64 @@ function loadTrack(id) {
 }
 
 const userVol = () => clamp(prefs.vol == null ? 1 : +prefs.vol, 0, 1);
+
+/* ---------- Exact-length clips ----------
+   A guessing clip is handed to the phone's audio engine as a clip that is
+   exactly N seconds long, so the engine itself ends it. Nothing depends on the
+   page waking up on time (phones hold pages back during a video call, in
+   another app, or with the screen dimmed). If this can't be used, the older
+   method below takes over, with its own safety net. */
+const WA = { id: null, buf: null, pending: null, src: null, gain: null, used: 0 };
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function prepareBuffer(id, url) {
+  if (isIOS) return;           /* iPhone mutes this kind of audio with the silent switch */
+  if (WA.id === id && (WA.buf || WA.pending)) return;
+  WA.id = id; WA.buf = null;
+  WA.pending = (async () => {
+    try {
+      unlockAudio();
+      if (!actx) return null;
+      const r = await fetch(url, { mode: 'cors' });
+      if (!r.ok) return null;
+      const data = await r.arrayBuffer();
+      const buf = await new Promise((res, rej) => { const pr = actx.decodeAudioData(data, res, rej); if (pr && pr.catch) pr.catch(rej); });
+      if (WA.id === id) WA.buf = buf;
+      return buf;
+    } catch (e) { return null; }
+    finally { if (WA.id === id) WA.pending = null; }
+  })();
+}
+async function getBuffer(id) {
+  if (WA.id !== id) return null;
+  if (WA.buf) return WA.buf;
+  if (!WA.pending) return null;
+  return Promise.race([WA.pending, new Promise(r => setTimeout(() => r(null), 2500))]);
+}
+function stopBuffer() {
+  const src = WA.src; WA.src = null;
+  if (src) { try { src.onended = null; src.stop(); } catch (e) {} }
+  if (WA.gain) { try { WA.gain.disconnect(); } catch (e) {} WA.gain = null; }
+}
+function playBuffer(buf, sec) {
+  if (!actx) return false;
+  try { if (actx.state !== 'running') actx.resume(); } catch (e) {}
+  if (actx.state !== 'running') return false;
+  stopBuffer();
+  const v = userVol(), t0 = actx.currentTime + 0.02;
+  const fin = Math.min(0.06, sec * 0.1), fout = Math.min(0.15, sec * 0.25);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(v, t0 + fin);
+  g.gain.setValueAtTime(v, t0 + sec - fout);
+  g.gain.linearRampToValueAtTime(0, t0 + sec);
+  const src = actx.createBufferSource();
+  src.buffer = buf;
+  src.connect(g); g.connect(actx.destination);
+  src.onended = () => { if (WA.src === src) { WA.src = null; WA.gain = null; P.playing = false; updatePlayBtn(); updateStageHint(); } };
+  src.start(t0, 0, sec);         /* the engine plays exactly `sec` seconds, then stops */
+  WA.src = src; WA.gain = g; WA.used++;
+  return true;
+}
 let fadeT = null;
 function setVol(v) { try { P.audio.volume = clamp(v, 0, 1); } catch (e) {} }
 /* Short fades in and out, so a clip never starts or stops with a click. */
@@ -1066,6 +1126,19 @@ async function playClip(id, sec) {
   try { await loadTrack(id); } catch (e) { return; }
   if (token !== P.token || P.id !== id) return;
   const a = P.audio;
+  if (sec) {
+    const buf = await getBuffer(id);
+    if (token !== P.token || P.id !== id) return;
+    if (buf) {
+      a.pause(); pauseFull();
+      if (playBuffer(buf, sec)) {
+        P.needTap = false; P.playing = true;
+        updatePlayBtn(); updateStageHint();
+        return;
+      }
+    }
+  }
+  stopBuffer();
   a.pause();
   try { a.currentTime = 0; } catch (e) {}
   setVol(0);
@@ -1091,6 +1164,7 @@ async function playClip(id, sec) {
 }
 function stopAudio() {
   P.token++; clearTimeout(P.stopT); clearInterval(fadeT); fadeT = null; P.stopAt = null;
+  if (WA.src) { stopBuffer(); P.playing = false; updatePlayBtn(); }
   try { P.audio.pause(); } catch (e) {}
   setVol(userVol());
 }
@@ -1430,12 +1504,33 @@ function renderCurrent() {
   else if (room.status === 'ended') { show('end'); renderEnd(); }
 }
 
+const acUniq = (arr) => {
+  const m = new Map();
+  arr.forEach(v => { const n = norm(v); if (n && !m.has(n)) m.set(n, { v, n, w: n.split(' ') }); });
+  return Array.from(m.values()).sort((a, b) => a.v.localeCompare(b.v));
+};
+/* Once the artist is identified, the song field offers that artist's songs:
+   their most popular songs on Deezer plus their songs in this game's list
+   (so the right one is always there, among others). */
+S.artistSongs = null;
+async function loadArtistSongs(num, tr) {
+  if (S.artistSongs && S.artistSongs.num === num) return;
+  S.artistSongs = { num, list: null };
+  const titles = [tr.t];
+  ((S.room && S.room.tracks) || []).forEach(x => { if (x && norm(x.a) === norm(tr.a)) titles.push(x.t); });
+  try {
+    const at = await artistTop(tr.a);
+    at.top.filter(c => c && c.artist && (!at.a || c.artist.id === at.a.id) && !isCover(c) && !BAD_VARIANT.test(vtitle(c)))
+      .slice(0, 30).forEach(c => titles.push(cleanTitle(c.title_short || c.title)));
+  } catch (e) {}
+  if (!S.artistSongs || S.artistSongs.num !== num) return;
+  S.artistSongs.list = acUniq(titles);
+  const inp = $('#in-title');
+  if (document.activeElement === inp && S.acFill && S.acFill.title) S.acFill.title();
+}
+
 function buildLists(tracks) {
-  const uniq = (arr) => {
-    const m = new Map();
-    arr.forEach(v => { const n = norm(v); if (n && !m.has(n)) m.set(n, { v, n, w: n.split(' ') }); });
-    return Array.from(m.values()).sort((a, b) => a.v.localeCompare(b.v));
-  };
+  const uniq = acUniq;
   S.artists = uniq([].concat(...tracks.map(x => x ? [x.a, heArtist(x)] : [])).filter(Boolean));
   S.titles = uniq(tracks.map(x => x && x.t));
 }
@@ -1557,6 +1652,10 @@ function renderGame() {
 
   lockField('title', r.titleBy, tr.t, revealed);
   lockField('artist', r.artistBy, showArtist(tr), revealed);
+  const ti = $('#in-title');
+  const wantPh = (r.artistBy && !r.titleBy && !revealed) ? t('pickSongOf', { a: showArtist(tr) }) : t('guessTitlePh');
+  if (ti.placeholder !== wantPh) ti.placeholder = wantPh;
+  if (r.artistBy && !r.titleBy && !revealed) loadArtistSongs(r.num, tr);
 
   renderReveal();
   updatePlayBtn(); updateStageHint();
@@ -1679,8 +1778,15 @@ function setupAC(kind) {
   const hide = () => { list.hidden = true; };
   const fill = () => {
     const q = norm(input.value);
+    const r = S.room && S.room.round;
+    const songsOf = kind === 'title' && r && r.artistBy && S.artistSongs && S.artistSongs.num === r.num && S.artistSongs.list;
+    if (songsOf && !q) {
+      list.innerHTML = songsOf.map(o => `<li><button type="button" data-v="${esc(o.v)}">${esc(o.v)}</button></li>`).join('');
+      list.hidden = !songsOf.length;
+      return;
+    }
     if (!q) { hide(); return; }
-    const all = kind === 'artist' ? S.artists : S.titles;
+    const all = songsOf ? songsOf.concat(S.titles.filter(o => !songsOf.some(x => x.n === o.n))) : (kind === 'artist' ? S.artists : S.titles);
     const a = [], b = [], c = [];
     for (const o of all) {
       if (o.n.startsWith(q)) a.push(o);
@@ -1693,8 +1799,10 @@ function setupAC(kind) {
     list.innerHTML = res.map(o => `<li><button type="button" data-v="${esc(o.v)}">${esc(o.v)}</button></li>`).join('');
     list.hidden = false;
   };
+  S.acFill = S.acFill || {}; S.acFill[kind] = fill;
   input.addEventListener('input', fill);
   input.addEventListener('focus', fill);
+  input.addEventListener('click', fill);
   input.addEventListener('blur', () => setTimeout(hide, 180));
   list.addEventListener('pointerdown', e => e.preventDefault());
   list.addEventListener('click', e => {
@@ -1713,7 +1821,8 @@ async function submitGuess(kind) {
   const text = input.value.trim();
   if (!r || !tr || r.state !== 'guessing' || !text) return;
   const targets = kind === 'artist' ? [tr.a, heArtist(tr)] : [tr.t];
-  if (!targets.some(x => x && norm(x) === norm(text))) {
+  const same = x => x && (norm(x) === norm(text) || (kind === 'title' && norm(cleanTitle(x)) === norm(cleanTitle(text))));
+  if (!targets.some(same)) {
     input.value = '';
     input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
     toast(t('nope'));
@@ -2814,7 +2923,8 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 /* ---------- New version check ----------
    When a newer version is uploaded, players get a small "Update" banner.
    Updating reloads the page and puts them straight back in their room. */
-const APP_VERSION = '2026-11-14c';
+const APP_VERSION = '2026-11-14e';
+$('#ver').textContent = 'Version ' + APP_VERSION;
 async function checkVersion() {
   if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
   try {
